@@ -137,6 +137,9 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-unset "M-m")
 (keymap-global-set "M-m" #'mc/mark-all-dwim)
 
+(keymap-global-unset "M-j")
+(keymap-global-set "M-j" #'join-line)
+
 (defun my/nuke-line-backwards ()
   "Nuke, as in delete without saving to register, line backwards."
   (interactive)

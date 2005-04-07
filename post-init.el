@@ -41,6 +41,10 @@
 (use-package rainbow-mode
   :ensure t)
 
+(use-package golden-ratio
+  :ensure t
+  :config (golden-ratio-mode t))
+
 ;;;;; Language input config
 (setq-default default-input-method 'russian-computer)
 (use-package reverse-im
@@ -204,7 +208,7 @@
 
 ;; dired: Group directories first
 (defun my/setup-dired-listing ()
-  "Configure dired with OS-appropriate ls options."
+  "Configure Dired with OS-appropriate ls options."
   (with-eval-after-load 'dired
     (let ((args "--group-directories-first -ahlv"))
       (cond
@@ -390,6 +394,10 @@ Useful when a theme partially loads with errors."
                       (7 . (bold 1.0))
                       (8 . (bold 1.0)))))
 
+(setq modus-vivendi-palette-user
+      '((tangerine "#FF9752")
+        (jeans "#6181B8")))
+
 (setq-default modus-vivendi-palette-overrides
               '((      fg-heading-1 blue-warmer)
                 (      bg-heading-1 bg-blue-nuanced)
@@ -422,7 +430,21 @@ Useful when a theme partially loads with errors."
                 (bg-line-number-active unspecified)
                 (bg-prose-block-contents bg-diff-context)
                 (bg-prose-block-delimiter bg-tab-bar)
-                (fg-prose-block-delimiter "gray80")))
+                (fg-prose-block-delimiter "gray80")
+                (cursor red-warmer)
+                (preprocessor yellow-cooler)
+                (keyword blue-faint)
+                (type blue-faint)
+                (string olive)
+                (operator tangerine)
+                (fnname red-warmer)
+                (fnname-call red-faint)
+                )
+              )
+
+(setq modus-operandi-palette-user
+      '((apricot "#C85100")
+        (sea "#1E417C")))
 
 (setq-default modus-operandi-palette-overrides
               '((      fg-heading-1 blue-warmer)
@@ -456,7 +478,16 @@ Useful when a theme partially loads with errors."
                 (bg-line-number-active unspecified)
                 (bg-prose-block-contents bg-diff-context)
                 (bg-prose-block-delimiter bg-tab-bar)
-                (fg-prose-block-delimiter "gray22")))
+                (fg-prose-block-delimiter "gray22")
+                (cursor red)
+                (preprocessor yellow-cooler)
+                (keyword sea)
+                (type sea)
+                (variable fg-main)
+                (operator apricot)))
+
+(setq modus-themes-italic-constructs nil
+      modus-themes-bold-constructs t)
 
 (setq-default spacemacs-theme-org-height t)
 
@@ -486,14 +517,18 @@ Useful when a theme partially loads with errors."
 (setq-default display-line-numbers-width-start t)
 
 ;;; Text editing options and packages
+
 ;;;; General text editing packages and config
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-(add-hook 'latex-mode-hook
+(add-hook 'LaTeX-mode-hook
           (lambda () (setq-local show-trailing-whitespace t)))
 (add-hook 'text-mode-hook
           (lambda () (setq-local show-trailing-whitespace t)))
 (add-hook 'prog-mode-hook
           (lambda () (setq-local show-trailing-whitespace t)))
+
+(use-package diff-hl
+  :ensure t)
 
 (use-package electric-pair-local-mode
   :ensure nil
@@ -610,6 +645,44 @@ Useful when a theme partially loads with errors."
   (after-init . save-place-mode)
   :custom
   (save-place-limit 400))
+
+;; Configure Tempel
+(use-package tempel
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
+    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
+    ;; programming mode Capf, such that it will be tried first.
+    ;; (setq-local completion-at-point-functions
+    ;;             (cons #'tempel-expand completion-at-point-functions))
+
+    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
+    ;; a trigger prefix character in order to prevent Tempel from triggering
+    ;; unexpectly.
+    (setq-local corfu-auto-trigger "/"
+                completion-at-point-functions
+                (cons (cape-capf-trigger #'tempel-complete ?/)
+                      completion-at-point-functions))
+    )
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+  )
+
+;; Optional: Add tempel-collection if you want ready-made templates.
+(use-package tempel-collection
+  :ensure t)
 
 ;;;; Better completion packages
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
@@ -1121,5 +1194,11 @@ Useful when a theme partially loads with errors."
 
 ;;;; C/C++
 (setq-default c-ts-mode-indent-offset 4)
+(setq-default c-default-style '((c-mode . "user")
+                                (c++-mode . "user")
+                                (java-mode . "java")
+                                (awk-mode . "awk")
+                                (other . "gnu")))
+
 
 ;;; post-init.el ends here

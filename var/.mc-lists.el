@@ -12,6 +12,7 @@
 
 (setq mc/cmds-to-run-once
       '(
+        beginning-of-buffer
         cdlatex-pbb
         compile
         next-buffer
