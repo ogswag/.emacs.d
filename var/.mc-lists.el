@@ -4,6 +4,7 @@
 (setq mc/cmds-to-run-for-all
       '(
         cdlatex-math-modify
+        mc/mark-next-lines
         multiple-cursors-mode
         my-move-bol-or-prev-eol
         my-move-eol-or-next-bol

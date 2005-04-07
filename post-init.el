@@ -500,29 +500,6 @@
 (setq modus-themes-italic-constructs nil
       modus-themes-bold-constructs t)
 
-(defface c-operator-face
-  '((t :inherit font-lock-operator-face))
-  "Face for C/C++ operators."
-  :group 'modus-themes-faces)
-
-(defun my/add-c-operator-highlighting ()
-  "Add operator highlighting to C/C++ modes."
-  (font-lock-add-keywords
-   nil
-   `(;; Multi-character operators (higher precedence)
-     ("\\(<<\\|>>\\|<=\\|>=\\|==\\|!=\\|&&\\|||\\|\\+\\+\\|--\\)"
-      1 'c-operator-face prepend)
-
-     ;; Single-character operators — place hyphen at end to avoid escape issues
-     ("\\([=+*/%&|^!<>?:~-]\\)"
-      1 'c-operator-face prepend))
-   'append))
-
-(add-hook 'c-mode-hook #'my/add-c-operator-highlighting)
-(add-hook 'c++-mode-hook #'my/add-c-operator-highlighting)
-
-(setq-default spacemacs-theme-org-height t)
-
 (setq calendar-latitude 55.75     ; Moscow
       calendar-longitude 37.62)
 
@@ -701,8 +678,8 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
-  ;; (corfu-auto t)
-  ;; (corfu-auto-delay 0.4)
+  (corfu-auto t)
+  (corfu-auto-delay 0.2)
   (corfu-cycle t)
   ;; Enable Corfu
   :config
@@ -1039,11 +1016,6 @@
 (use-package meow
   :ensure t)
 
-(use-package meow-tree-sitter
-  :ensure t)
-(require 'meow-tree-sitter)
-(meow-tree-sitter-register-defaults)
-
 ;;;; Cool things
 ;;  Draw ▶─UNICODE diagrams─◀ within ▶─your texts─◀ in Emacs
 (use-package uniline
@@ -1167,7 +1139,6 @@
                                           "typst-lsp"))))))
 
 ;;;; C/C++
-(setq-default c-ts-mode-indent-offset 4)
 
 ;; Define a custom style matching your clang-format config
 (defconst llvm-allman-style
@@ -1214,112 +1185,86 @@
         (topmost-intro . 0)
         (topmost-intro-cont . 0)
         ;; Brace placement for Allman style
-        (statement-block-intro . +))))
+        (statement-block-intro . +)))
+    ;; Move cleanup list to style definition (optional)
+    (c-cleanup-list . (brace-else-brace
+                       brace-elseif-brace
+                       empty-defun-braces
+                       defun-close-semi
+                       list-close-comma
+                       scope-operator))
+    ;; Move hanging braces to style definition
+    (c-hanging-braces-alist . ((defun-open after)
+                               (defun-close before after)
+                               (class-open after)
+                               (class-close before after)
+                               (namespace-open after)
+                               (namespace-close before after)
+                               (inline-open after)
+                               (inline-close before after)
+                               (block-open after)
+                               (block-close before after)
+                               (extern-lang-open after)
+                               (extern-lang-close before after)
+                               (statement-case-open after)
+                               (substatement-open after))))
   "My personal C/C++ style matching .clang-format configuration.")
 
 ;; Register style only for CC-mode
 (c-add-style "llvm-allman" llvm-allman-style)
 
-;; Set default style only for traditional CC-mode
+(defun my/setup-c-style ()
+  "Setup my personal C/C++ style for all C-like modes."
+  ;; Common settings for all C-like modes
+  (setq-local tab-width 4)
+  (setq-local indent-tabs-mode nil)   ; Use spaces, not tabs
+  (setq-local fill-column 120)        ; Column limit
+  (setq-local comment-column 40)      ; Align comments to column 40
+
+  ;; Electric pair settings for Allman style braces
+  (setq-local electric-pair-preserve-balance t)
+  (setq-local electric-pair-open-newline-between-pairs t)
+
+  ;; Set the style - this will apply all settings from llvm-allman-style
+  (c-set-style "llvm-allman")
+
+  (setq-local tab-always-indent 'complete)
+
+  ;; Add operator highlighting to C/C++ modes.
+  (font-lock-add-keywords
+   nil
+   `(;; Multi-character operators (higher precedence)
+     ("\\(<<\\|>>\\|<=\\|>=\\|==\\|!=\\|&&\\|||\\|\\+\\+\\|--\\)"
+      1 'font-lock-operator-face prepend)
+
+     ;; Single-character operators
+     ("\\([=+*/%&|^!<>?:~-]\\)"
+      1 'font-lock-operator-face prepend))
+   'append))
+
+(defun my/tempel-or-indent ()
+  "Expand tempel template if possible; otherwise indent."
+  (interactive)
+  (if (and (bound-and-true-p tempel-mode)
+           (tempel-complete))
+      t
+    (c-indent-line-or-region)))
+
+;; Set default style for new buffers
 (setq-default c-default-style '((c-mode . "llvm-allman")
                                 (c++-mode . "llvm-allman")
                                 (java-mode . "java")
                                 (awk-mode . "awk")
                                 (other . "gnu")))
 
-(defun my-setup-c-style ()
-  "Setup my personal C/C++ style for all C-like modes."
-  ;; Common settings for all C-like modes
-  (setq-local tab-width 4)
-  (setq-local indent-tabs-mode nil)     ; Use spaces, not tabs
-  (setq-local fill-column 120)          ; Column limit
-  (setq-local comment-column 40)        ; Align comments to column 40
-
-  ;; Electric pair settings for Allman style braces
-  (setq-local electric-pair-preserve-balance t)
-  (setq-local electric-pair-open-newline-between-pairs t)
-
-  ;; Setup specific style based on mode
-  (cond
-   ;; For traditional CC-mode (c-mode, c++-mode)
-   ((or (eq major-mode 'c-mode) (eq major-mode 'c++-mode))
-    (setq-local c-basic-offset 4)
-    (setq-local c-cleanup-list
-                '(brace-else-brace
-                  brace-elseif-brace
-                  empty-defun-braces
-                  defun-close-semi
-                  list-close-comma
-                  scope-operator))
-    (setq-local c-hanging-braces-alist
-                '((defun-open after)
-                  (defun-close before after)
-                  (class-open after)
-                  (class-close before after)
-                  (namespace-open after)
-                  (namespace-close before after)
-                  (inline-open after)
-                  (inline-close before after)
-                  (block-open after)
-                  (block-close before after)
-                  (extern-lang-open after)
-                  (extern-lang-close before after)
-                  (statement-case-open after)
-                  (substatement-open after)))
-    ;; Set style only in CC-mode buffers
-    (c-set-style "llvm-allman"))
-
-   ;; For tree-sitter modes
-   ((or (eq major-mode 'c-ts-mode) (eq major-mode 'c++-ts-mode))
-    ;; Electric pair settings for Allman style braces
-    (setq-local electric-pair-preserve-balance t)
-    (setq-local electric-pair-open-newline-between-pairs t)
-    )))
-
-;; Add to all C-like modes
-(setq-default c-ts-mode-indent-offset 4)
-(setq-default c-ts-mode-indent-style 'bsd)
-
-(setq treesit-simple-indent-rules
-      '((c-ts-mode
-         ;; Function definitions: body indented, braces at base level (Allman)
-         ((parent-is "function_definition") (child-is "compound_statement") prefix 0)
-         ((parent-is "function_definition") node "}" prefix 0)
-
-         ;; Control structures (if/for/while/switch): Allman braces
-         ((parent-is "if_statement") (child-is "compound_statement") prefix 0)
-         ((parent-is "if_statement") node "}" prefix 0)
-         ((parent-is "for_statement") (child-is "compound_statement") prefix 0)
-         ((parent-is "for_statement") node "}" prefix 0)
-         ((parent-is "while_statement") (child-is "compound_statement") prefix 0)
-         ((parent-is "while_statement") node "}" prefix 0)
-         ((parent-is "switch_statement") (child-is "compound_statement") prefix 0)
-         ((parent-is "switch_statement") node "}" prefix 0)
-
-         ;; Compound statements (nested blocks): indent body
-         ((parent-is "compound_statement") (child-is "compound_statement") prefix 4)
-         ((parent-is "compound_statement") node "}" prefix 0)
-
-         ;; Statements inside compound blocks
-         ((parent-is "compound_statement") node-is "expression_statement" prefix 4)
-         ((parent-is "compound_statement") node-is "declaration" prefix 4)
-         ((parent-is "compound_statement") node-is "if_statement" prefix 4)
-         ((parent-is "compound_statement") node-is "for_statement" prefix 4)
-         ((parent-is "compound_statement") node-is "while_statement" prefix 4)
-         ((parent-is "compound_statement") node-is "return_statement" prefix 4)
-
-         ;; Namespace indentation (Inner style)
-         ((parent-is "namespace_definition") (child-is "declaration") prefix 4)
-         ((parent-is "namespace_definition") (child-is "namespace_definition") prefix 4)
-
-         ;; Default: no extra indentation for top-level items
-         (node-is "translation_unit" node-is "declaration" no-indent)
-         )))
-(add-hook 'c-mode-hook 'my-setup-c-style)
-(add-hook 'c++-mode-hook 'my-setup-c-style)
-(add-hook 'c-ts-mode-hook 'my-setup-c-style)
-(add-hook 'c++-ts-mode-hook 'my-setup-c-style)
-
+;; Apply to existing buffers via hooks
+(add-hook 'c-mode-hook 'my/setup-c-style)
+(add-hook 'c++-mode-hook 'my/setup-c-style)
+;; Add after your style setup in the hook
+(add-hook 'c-mode-hook
+          (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
+(add-hook 'c++-mode-hook
+          (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
 
 ;;;; Snippets
 ;; Configure Tempel
