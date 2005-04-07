@@ -6,6 +6,8 @@
 ;;; Emacs System Options and Packages
 ;;;; General System Options and Packages
 
+(setq use-package-enable-imenu-support t)
+
 ;; Only use exec-path-from-shell on macOS
 (use-package exec-path-from-shell
   :ensure t
@@ -339,27 +341,12 @@
 ;;;; Themes
 (setq-default custom-safe-themes t)
 
-(defun my/nuke-all-faces-colors ()
-  "Hard reset all faces and themes. Good for broken partial theme loads."
-  (interactive)
-  ;; Step 1: Disable all themes
-  (dolist (theme (copy-sequence custom-enabled-themes))
-    (disable-theme theme))
-
-  ;; Step 2: Clear face customizations by resetting everything to standard
-  ;; This iterates through all defined faces and removes custom specs
-  (mapc (lambda (face)
-          (face-spec-reset-face face))
-        (face-list)))
-
-(defun my/reset-all-faces-to-default ()
-  "Reset all faces to their defaults and clear all loaded themes.
-Useful when a theme partially loads with errors."
-  (interactive)
-  ;; First, disable all active themes
-  (mapc #'disable-theme (copy-sequence custom-enabled-themes))
-  ;; Then reset all faces to standard specs
-  (custom-reset-faces '(default default)))
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 (require 'treesit)
 
@@ -439,6 +426,9 @@ Useful when a theme partially loads with errors."
                 (operator tangerine)
                 (fnname red-warmer)
                 (fnname-call red-faint)
+                (variable fg-ochre)
+                (property fg-ochre)
+                (variable-use fg-ochre)
                 )
               )
 
@@ -646,44 +636,6 @@ Useful when a theme partially loads with errors."
   :custom
   (save-place-limit 400))
 
-;; Configure Tempel
-(use-package tempel
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-
-  :init
-
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
-    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
-    ;; programming mode Capf, such that it will be tried first.
-    ;; (setq-local completion-at-point-functions
-    ;;             (cons #'tempel-expand completion-at-point-functions))
-
-    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
-    ;; a trigger prefix character in order to prevent Tempel from triggering
-    ;; unexpectly.
-    (setq-local corfu-auto-trigger "/"
-                completion-at-point-functions
-                (cons (cape-capf-trigger #'tempel-complete ?/)
-                      completion-at-point-functions))
-    )
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-  )
-
-;; Optional: Add tempel-collection if you want ready-made templates.
-(use-package tempel-collection
-  :ensure t)
-
 ;;;; Better completion packages
 ;; Corfu enhances in-buffer completion by displaying a compact popup with
 ;; current candidates, positioned either below or above the point. Candidates
@@ -703,8 +655,8 @@ Useful when a theme partially loads with errors."
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
-  (corfu-auto t)
-  (corfu-auto-delay 0.4)
+  ;; (corfu-auto t)
+  ;; (corfu-auto-delay 0.4)
   (corfu-cycle t)
   ;; Enable Corfu
   :config
@@ -805,22 +757,23 @@ Useful when a theme partially loads with errors."
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
-
-;; Consult offers a suite of commands for efficient searching, previewing, and
-;; interacting with buffers, file contents, and more, improving various tasks.
 (use-package consult
   :ensure t
+  ;; Replace bindings. Lazily loaded by `use-package'.
 
-  ;; Enable automatic preview at point in the *Completions* buffer.
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-
+  ;; The :init configuration is always executed (Not lazy)
   :init
-  ;; Optionally configure the register formatting. This improves the register
-  (setq register-preview-delay 0.5
-        register-preview-function #'consult-register-format)
 
-  ;; Optionally tweak the register preview window.
+  ;; Tweak the register preview for `consult-register-load',
+  ;; `consult-register-store' and the built-in commands.  This improves the
+  ;; register formatting, adds thin separator lines, register sorting and hides
+  ;; the window mode line.
   (advice-add #'register-preview :override #'consult-register-window)
+  (setq register-preview-delay 0.5)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
 
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
@@ -836,30 +789,38 @@ Useful when a theme partially loads with errors."
   (setq consult-async-input-debounce 0.02
         consult-async-input-throttle 0.05
         consult-async-refresh-delay 0.02)
-
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
   :config
+
+  ;; Optionally configure preview. The default value
+  ;; is 'any, such that any key triggers the preview.
+  ;; (setq consult-preview-key 'any)
+  ;; (setq consult-preview-key "M-.")
+  ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+  ;; For some commands and buffer sources it is useful to configure the
+  ;; :preview-key on a per-command basis using the `consult-customize' macro.
   (consult-customize
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
+   consult-source-bookmark consult-source-file-register
+   consult-source-recent-file consult-source-project-recent-file
    consult-buffer :preview-key nil
    consult-recent-file :preview-key nil
    consult-project-buffer :preview-key nil
    ;; :preview-key "M-."
    ;; :preview-key '(:debounce 0.4 any)
    )
-  (setq consult-narrow-key "<"))
 
-;; (setq-default consult-preview-key nil)
+  ;; Optionally configure the narrowing key.
+  ;; Both < and C-+ work reasonably well.
+  (setq consult-narrow-key "<") ;; "C-+"
 
-;; Disable preview for buffer-related commands only
-;; (consult-customize
-;;  consult-buffer :preview-key nil
-;;  consult-recent-file :preview-key nil
-;;  consult-project-buffer :preview-key nil)
-
+  ;; Optionally make narrowing help available in the minibuffer.
+  ;; You may want to use `embark-prefix-help-command' or which-key instead.
+  ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
+  )
 
 ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
 ;; system, providing more convenient undo/redo functionality.
@@ -870,11 +831,6 @@ Useful when a theme partially loads with errors."
              undo-fu-only-redo-all
              undo-fu-disable-checkpoint)
   )
-(keymap-global-unset "C-z")
-(keymap-global-unset "s-z")
-(keymap-global-unset "s-Z")
-(keymap-global-set "s-z" #'undo-fu-only-undo)
-(keymap-global-set "s-Z" #'undo-fu-only-redo)
 
 ;; The undo-fu-session package complements undo-fu by enabling the saving
 ;; and restoration of undo history across Emacs sessions, even after restarting.
@@ -920,10 +876,10 @@ Useful when a theme partially loads with errors."
 (setq consult-buffer-sources
       '(;; consult--source-hidden-buffer     ; Hidden buffers (SPC to show)
         ;; consult--source-modified-buffer   ; Modified buffers (* to show)
-        consult--source-buffer           ; Regular buffers
+        consult-source-buffer           ; Regular buffers
         ;; consult--source-bookmark         ; Bookmarks (m to show)
         ;; consult--source-file-register    ; File registers (r to show)
-        consult--source-project-buffer   ; Project buffers
+        consult-source-project-buffer   ; Project buffers
         ;; consult--source-recent-file   ; Remove this line
         ;; consult--source-project-recent-file ; Optionally remove this too
         ))
@@ -943,7 +899,7 @@ Useful when a theme partially loads with errors."
   :config
   (mason-setup))
 (mason-setup
-  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier" "digestif" "tex-fmt"))
+  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier" "tex-fmt"))
     (unless (mason-installed-p pkg)
       (ignore-errors (mason-install pkg)))))
 
@@ -1024,34 +980,6 @@ Useful when a theme partially loads with errors."
 
 ;; Set multiple languages
 (setq jinx-languages "en_US ru_RU")
-
-;;;; Snippets
-;; The official collection of snippets for yasnippet.
-(use-package yasnippet-snippets
-  :ensure t
-  :after yasnippet)
-
-;; YASnippet is a template system designed that enhances text editing by
-;; enabling users to define and use snippets. When a user types a short
-;; abbreviation, YASnippet automatically expands it into a full template, which
-;; can include placeholders, fields, and dynamic content.
-(use-package yasnippet
-  :ensure t
-  :commands (yas-minor-mode
-             yas-global-mode)
-
-  :custom
-  (yas-also-auto-indent-first-line t)  ; Indent first line of snippet
-  (yas-also-indent-empty-lines t)
-  (yas-snippet-revival nil)  ; Setting this to t causes issues with undo
-  (yas-wrap-around-region nil) ; Do not wrap region when expanding snippets
-  ;; (yas-triggers-in-field nil)  ; Disable nested snippet expansion
-  ;; (yas-indent-line 'fixed) ; Do not auto-indent snippet content
-  ;; (yas-prompt-functions '(yas-no-prompt))  ; No prompt for snippet choices
-
-  :init
-  ;; Suppress verbose messages
-  (setq yas-verbosity 0))
 
 ;;;; Navigation while editing
 (use-package avy
@@ -1199,6 +1127,74 @@ Useful when a theme partially loads with errors."
                                 (java-mode . "java")
                                 (awk-mode . "awk")
                                 (other . "gnu")))
+
+;;; Personal function definitions
+(defun my/nuke-line-backwards ()
+  "Nuke, as in delete without saving to register, line backwards."
+  (interactive)
+  (cond
+   ;; If at beginning of line, delete previous newline (join lines)
+   ((= (point) (line-beginning-position))
+    (delete-char -1))
+
+   ;; Otherwise delete to beginning of line
+   (t
+    (delete-region (point) (line-beginning-position)))))
+
+(defun my/move-bol-or-prev-eol ()
+  "Move to beginning of line, or to end of previous line if already at bol."
+  (interactive)
+  (if (bolp)
+      (progn
+        (forward-line -1)
+        (end-of-line))
+    (beginning-of-line)))
+
+(defun my/move-eol-or-next-bol ()
+  "Move to beginning of line, or to end of previous line if already at bol."
+  (interactive)
+  (if (eolp)
+      (progn
+        (forward-line 1)
+        (beginning-of-line))
+    (end-of-line)))
+
+
+;;;; Snippets
+;; Configure Tempel
+(use-package tempel
+  :ensure t
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+
+  :init
+
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
+    ;; only triggers on exact matches. We add `tempel-expand' *before* the main
+    ;; programming mode Capf, such that it will be tried first.
+    ;; (setq-local completion-at-point-functions
+    ;;             (cons #'tempel-expand completion-at-point-functions))
+
+    ;; Alternatively use `tempel-complete' if you want to see all matches.  Use
+    ;; a trigger prefix character in order to prevent Tempel from triggering
+    ;; unexpectly.
+    (setq-local corfu-auto-trigger "/"
+                completion-at-point-functions
+                (cons (cape-capf-trigger #'tempel-complete ?/)
+                      completion-at-point-functions))
+    )
+
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+  )
 
 
 ;;; post-init.el ends here
