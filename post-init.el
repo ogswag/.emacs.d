@@ -204,6 +204,9 @@
   :ensure t)
 
 ;;;; Org Mode
+(setq-default org-babel-load-languages '((emacs-lisp . t)
+                                         (C, D, C++, and cpp . t)))
+
 (load (expand-file-name "org.el" user-emacs-directory) t t)
 
 ;;; Emacs Appearance
@@ -264,11 +267,28 @@
 ;;;; Themes
 (setq-default custom-safe-themes t)
 
-(use-package treesit-auto
-  :ensure t
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)  ; register all ts-modes
-  (global-treesit-auto-mode))
+(defun my/nuke-all-faces-colors ()
+  "Hard reset all faces and themes. Good for broken partial theme loads."
+  (interactive)
+  ;; Step 1: Disable all themes
+  (dolist (theme (copy-sequence custom-enabled-themes))
+    (disable-theme theme))
+
+  ;; Step 2: Clear face customizations by resetting everything to standard
+  ;; This iterates through all defined faces and removes custom specs
+  (mapc (lambda (face)
+          (face-spec-reset-face face))
+        (face-list)))
+
+(defun my/reset-all-faces-to-default ()
+  "Reset all faces to their defaults and clear all loaded themes.
+Useful when a theme partially loads with errors."
+  (interactive)
+  ;; First, disable all active themes
+  (mapc #'disable-theme (copy-sequence custom-enabled-themes))
+  ;; Then reset all faces to standard specs
+  (custom-reset-faces '(default default)))
+
 
 (require 'treesit)
 
@@ -289,8 +309,6 @@
 ;; Set the maximum level of syntax highlighting for Tree-sitter modes
 (setq treesit-font-lock-level 4)
 
-(setq-default font-latex-fontify-sectioning 1.3)
-
 (use-package leuven-theme
   :ensure t)
 
@@ -305,7 +323,7 @@
 (use-package auto-dark
   :ensure t
   :custom
-  (auto-dark-themes '((doom-immaterial-dark) (spacemacs-light)))
+  (auto-dark-themes '((fleetish) (tango-plus)))
   (auto-dark-polling-interval-seconds 5)
   (auto-dark-allow-osascript t)
   :init (auto-dark-mode)
@@ -888,7 +906,11 @@
 
 ;;; Programming Languages
 
-;;; CSV
+;;;; ssh
+(use-package ssh-config-mode
+  :ensure t)
+
+;;;; CSV
 (use-package csv-mode
   :ensure t)
 

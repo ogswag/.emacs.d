@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- no-byte-compile: t; -*- lexical-binding: t; -*-
 (require 'spacemacs-theme)
 
 (deftheme spacemacs-dark "Spacemacs theme, the dark version")

@@ -1,4 +1,4 @@
-;;; spacemacs-theme.el --- Color theme with a dark and light versions.  -*- lexical-binding: t; -*-
+;;; -*- no-byte-compile: t; spacemacs-theme.el --- Color theme with a dark and light versions.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2018 Nasser Alshammari
 
@@ -690,12 +690,12 @@ to `auto', tags may not be properly aligned. "
      `(font-latex-italic-face ((,class (:foreground ,keyword :slant italic))))
      `(font-latex-match-reference-keywords ((,class (:foreground ,const))))
      `(font-latex-match-variable-keywords ((,class (:foreground ,var))))
-     `(font-latex-sectioning-0-face ((,class (:inherit bold :foreground ,head3 :height ,(if spacemacs-theme-org-height 1.5 1.0) :background ,(if spacemacs-theme-org-highlight head3-bg 'unspecified)))))
-     `(font-latex-sectioning-1-face ((,class (:inherit bold :foreground ,head4 :height ,(if spacemacs-theme-org-height 1.5 1.0) :background ,(if spacemacs-theme-org-highlight head4-bg 'unspecified)))))
-     `(font-latex-sectioning-2-face ((,class (:inherit bold :foreground ,head1 :height ,(if spacemacs-theme-org-height 1.4 1.0) :background ,(if spacemacs-theme-org-highlight head1-bg 'unspecified)))))
-     `(font-latex-sectioning-3-face ((,class (:inherit bold :foreground ,head2 :height ,(if spacemacs-theme-org-height 1.3 1.0) :background ,(if spacemacs-theme-org-highlight head2-bg 'unspecified)))))
-     `(font-latex-sectioning-4-face ((,class (:weight bold :foreground ,head3 :height ,(if spacemacs-theme-org-height 1.2 1.0) :background ,(if spacemacs-theme-org-highlight head3-bg 'unspecified)))))
-     `(font-latex-sectioning-5-face ((,class (:weight bold :foreground ,head4 :background ,(if spacemacs-theme-org-highlight head4-bg 'unspecified)))))
+     `(font-latex-sectioning-0-face ((,class (:inherit outline-1))))
+     `(font-latex-sectioning-1-face ((,class (:inherit outline-1))))
+     `(font-latex-sectioning-2-face ((,class (:inherit outline-2))))
+     `(font-latex-sectioning-3-face ((,class (:inherit outline-3))))
+     `(font-latex-sectioning-4-face ((,class (:inherit outline-4))))
+     `(font-latex-sectioning-5-face ((,class (:inherit outline-5))))
      `(font-latex-string-face ((,class (:foreground ,str))))
      `(font-latex-warning-face ((,class (:foreground ,war))))
 
@@ -775,12 +775,12 @@ to `auto', tags may not be properly aligned. "
      `(Man-underline ((,class (:foreground ,comp :underline t))))
 
 ;;;;; markdown
-     `(markdown-header-face-1 ((,class (:inherit bold :foreground ,head1 :height ,(if spacemacs-theme-org-height 1.3 1.0) :background ,(if spacemacs-theme-org-highlight head1-bg 'unspecified)))))
-     `(markdown-header-face-2 ((,class (:inherit bold :foreground ,head2 :height ,(if spacemacs-theme-org-height 1.2 1.0) :background ,(if spacemacs-theme-org-highlight head2-bg 'unspecified)))))
-     `(markdown-header-face-3 ((,class (:weight normal :foreground ,head3 :height ,(if spacemacs-theme-org-height 1.1 1.0) :background ,(if spacemacs-theme-org-highlight head3-bg 'unspecified)))))
-     `(markdown-header-face-4 ((,class (:weight normal :foreground ,head4 :background ,(if spacemacs-theme-org-highlight head4-bg 'unspecified)))))
-     `(markdown-header-face-5 ((,class (:weight normal :foreground ,head1))))
-     `(markdown-header-face-6 ((,class (:weight normal :foreground ,head2))))
+     `(markdown-header-face-1 ((,class (:inherit outline-1))))
+     `(markdown-header-face-2 ((,class (:inherit outline-2))))
+     `(markdown-header-face-3 ((,class (:inherit outline-3))))
+     `(markdown-header-face-4 ((,class (:inherit outline-4))))
+     `(markdown-header-face-5 ((,class (:inherit outline-5))))
+     `(markdown-header-face-6 ((,class (:inherit outline-6))))
      `(markdown-table-face ((,class (:foreground ,base :background ,head1-bg))))
 
 ;;;;; mode-line
@@ -884,11 +884,11 @@ to `auto', tags may not be properly aligned. "
      `(org-warning ((,class (:foreground ,err :inherit org-priority))))
 
 ;;;;; outline
-     `(outline-1 ((,class (:foreground ,head1 :weight bold :height 1.4))))
-     `(outline-2 ((,class (:foreground ,head2 :weight bold :height 1.3))))
-     `(outline-3 ((,class (:foreground ,head3 :weight bold :height 1.2))))
-     `(outline-4 ((,class (:foreground ,head4 :weight bold :height 1.1))))
-     `(outline-5 ((,class (:foreground ,head1 :weight bold ))))
+     `(outline-1 ((,class (:foreground ,head1 :weight bold :height 1.5))))
+     `(outline-2 ((,class (:foreground ,head2 :weight bold :height 1.4))))
+     `(outline-3 ((,class (:foreground ,head3 :weight bold :height 1.3))))
+     `(outline-4 ((,class (:foreground ,head4 :weight bold :height 1.2))))
+     `(outline-5 ((,class (:foreground ,head1 :weight bold :height 1.1))))
      `(outline-6 ((,class (:foreground ,head2 :weight bold ))))
      `(outline-7 ((,class (:foreground ,head3 :weight bold ))))
      `(outline-8 ((,class (:foreground ,head4 :weight bold ))))

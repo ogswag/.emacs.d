@@ -1,4 +1,4 @@
-;;; twilight-theme.el --- Twilight Color Theme for Emacs. -*- lexical-binding: t; -*-
+;;; -*- no-byte-compile: t; twilight-theme.el --- Twilight Color Theme for Emacs. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008 Marcus Crafter <crafterm@redartisan.com>
 ;; Copyright (C) 2015-2017 Jason Blevins <jrblevin@sdf.org>
