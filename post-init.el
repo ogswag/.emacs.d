@@ -289,7 +289,6 @@ Useful when a theme partially loads with errors."
   ;; Then reset all faces to standard specs
   (custom-reset-faces '(default default)))
 
-
 (require 'treesit)
 
 (setq treesit-language-source-alist
@@ -312,12 +311,59 @@ Useful when a theme partially loads with errors."
 (use-package leuven-theme
   :ensure t)
 
+(setq-default modus-themes-headings
+              (quote ((0 . (bold 1.8))
+                      (1 . (bold 1.8))
+                      (2 . (bold 1.6))
+                      (3 . (bold 1.4))
+                      (4 . (bold 1.2))
+                      (5 . (bold 1.1))
+                      (6 . (bold 1.0))
+                      (7 . (bold 1.0))
+                      (8 . (bold 1.0)))))
+
+;; Apply colorful foreground, background, and overline (headings 0-8)
+(setq modus-themes-common-palette-overrides
+      '((      fg-heading-1 blue-warmer)
+        (      bg-heading-1 bg-blue-nuanced)
+        (overline-heading-1 blue)
+        (      fg-heading-2 cyan-faint)
+        (      bg-heading-2 bg-cyan-nuanced)
+        (overline-heading-2 cyan-faint)
+        (      fg-heading-3 green-faint)
+        (      bg-heading-3 bg-green-nuanced)
+        (overline-heading-3 green-faint)
+        (      fg-heading-4 "#AED581")
+        (      bg-heading-4 "#1F2900")
+        (overline-heading-4 "#AED581")
+        (      fg-heading-5 magenta-cooler)
+        (      bg-heading-5 bg-magenta-nuanced)
+        (overline-heading-5 magenta-cooler)
+        (      fg-heading-6 red)
+        (      bg-heading-6 bg-red-nuanced)
+        (overline-heading-6 red)
+        (      fg-heading-7 "#FF8226")
+        (      bg-heading-7 "#2A1900")
+        (overline-heading-7 "#FF8226")
+        (      fg-heading-8 yellow)
+        (      bg-heading-8 bg-yellow-nuanced)
+        (overline-heading-8 yellow)
+        (fringe unspecified)
+        (fg-line-number-inactive "gray50")
+        (fg-line-number-active fg-main)
+        (bg-line-number-inactive unspecified)
+        (bg-line-number-active unspecified)
+        (bg-prose-block-contents bg-diff-context)
+        (bg-prose-block-delimiter bg-tab-bar)
+        (fg-prose-block-delimiter "gray80")))
+
 (setq-default spacemacs-theme-org-height t)
+(setq-default doom-immaterial-dark-brighter-modeline t)
 
 (use-package auto-dark
   :ensure t
   :custom
-  (auto-dark-themes '((spacemacs-dark) (tango-plus)))
+  (auto-dark-themes '((modus-vivendi) (tango-plus)))
   (auto-dark-polling-interval-seconds 5)
   (auto-dark-allow-osascript t)
   :init (auto-dark-mode)
