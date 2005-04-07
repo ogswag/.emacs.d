@@ -341,12 +341,13 @@
 ;;;; Themes
 (setq-default custom-safe-themes t)
 
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+;; (use-package treesit-auto
+;;   :ensure t
+;;   :custom
+;;   (treesit-auto-install 'prompt)
+;;   :config
+;;   (treesit-auto-add-to-auto-mode-alist 'all)
+;;   (global-treesit-auto-mode))
 
 (require 'treesit)
 
@@ -360,12 +361,22 @@
          "split_parser"
          "tree-sitter-markdown-inline/src")))
 
-(dolist (lang '(markdown markdown_inline))
-  (unless (treesit-language-available-p lang)
-    (treesit-install-language-grammar lang)))
+;; (dolist (lang '(markdown markdown_inline))
+;;   (unless (treesit-language-available-p lang)
+;;     (treesit-install-language-grammar lang)))
+;;
+;; ;; Set the maximum level of syntax highlighting for Tree-sitter modes
+;; (setq treesit-font-lock-level 4)
+;;
+;; (defun my/disable-treesit-indent ()
+;;   "Disable Tree-sitter indentation, fall back to smie or cc-mode."
+;;   (setq-local indent-line-function #'prog-indentation-contextual)
+;;   (setq-local indent-region-function nil))  ; Or #'indent-region if preferred
+;;
+;; (add-hook 'c-ts-mode-hook #'my/disable-treesit-indent)
+;; (add-hook 'c++-ts-mode-hook #'my/disable-treesit-indent)
+;; (add-hook 'prog-mode-hook #'my/disable-treesit-indent)
 
-;; Set the maximum level of syntax highlighting for Tree-sitter modes
-(setq treesit-font-lock-level 4)
 
 (use-package leuven-theme
   :ensure t)
@@ -489,6 +500,27 @@
 (setq modus-themes-italic-constructs nil
       modus-themes-bold-constructs t)
 
+(defface c-operator-face
+  '((t :inherit font-lock-operator-face))
+  "Face for C/C++ operators."
+  :group 'modus-themes-faces)
+
+(defun my/add-c-operator-highlighting ()
+  "Add operator highlighting to C/C++ modes."
+  (font-lock-add-keywords
+   nil
+   `(;; Multi-character operators (higher precedence)
+     ("\\(<<\\|>>\\|<=\\|>=\\|==\\|!=\\|&&\\|||\\|\\+\\+\\|--\\)"
+      1 'c-operator-face prepend)
+
+     ;; Single-character operators — place hyphen at end to avoid escape issues
+     ("\\([=+*/%&|^!<>?:~-]\\)"
+      1 'c-operator-face prepend))
+   'append))
+
+(add-hook 'c-mode-hook #'my/add-c-operator-highlighting)
+(add-hook 'c++-mode-hook #'my/add-c-operator-highlighting)
+
 (setq-default spacemacs-theme-org-height t)
 
 (setq calendar-latitude 55.75     ; Moscow
@@ -502,6 +534,10 @@
         '((:sunrise . modus-operandi)
           (:sunset  . modus-vivendi)))
   (circadian-setup))
+
+(use-package beacon
+  :ensure t
+  :config (beacon-mode t))
 
 ;;;; Line numbers
 ;; Display the current line and column numbers in the mode line
@@ -1231,74 +1267,58 @@
                   (statement-case-open after)
                   (substatement-open after)))
     ;; Set style only in CC-mode buffers
-    (c-set-style "llvm-allman")
-    (setq-local c-auto-newline 1))
+    (c-set-style "llvm-allman"))
 
-   ;; For tree-sitter modes (Emacs 29+)
+   ;; For tree-sitter modes
    ((or (eq major-mode 'c-ts-mode) (eq major-mode 'c++-ts-mode))
-    ;; Set tree-sitter indentation offset
-    ;; (setq-local c-ts-mode-indent-offset 4)
-    ;; (setq-local c-ts-mode-indent-style 'bsd)
+    ;; Electric pair settings for Allman style braces
+    (setq-local electric-pair-preserve-balance t)
+    (setq-local electric-pair-open-newline-between-pairs t)
     )))
 
-;; Handle c-or-c++-ts-mode if it exists (some Emacs versions use this)
-
 ;; Add to all C-like modes
+(setq-default c-ts-mode-indent-offset 4)
+(setq-default c-ts-mode-indent-style 'bsd)
+
+(setq treesit-simple-indent-rules
+      '((c-ts-mode
+         ;; Function definitions: body indented, braces at base level (Allman)
+         ((parent-is "function_definition") (child-is "compound_statement") prefix 0)
+         ((parent-is "function_definition") node "}" prefix 0)
+
+         ;; Control structures (if/for/while/switch): Allman braces
+         ((parent-is "if_statement") (child-is "compound_statement") prefix 0)
+         ((parent-is "if_statement") node "}" prefix 0)
+         ((parent-is "for_statement") (child-is "compound_statement") prefix 0)
+         ((parent-is "for_statement") node "}" prefix 0)
+         ((parent-is "while_statement") (child-is "compound_statement") prefix 0)
+         ((parent-is "while_statement") node "}" prefix 0)
+         ((parent-is "switch_statement") (child-is "compound_statement") prefix 0)
+         ((parent-is "switch_statement") node "}" prefix 0)
+
+         ;; Compound statements (nested blocks): indent body
+         ((parent-is "compound_statement") (child-is "compound_statement") prefix 4)
+         ((parent-is "compound_statement") node "}" prefix 0)
+
+         ;; Statements inside compound blocks
+         ((parent-is "compound_statement") node-is "expression_statement" prefix 4)
+         ((parent-is "compound_statement") node-is "declaration" prefix 4)
+         ((parent-is "compound_statement") node-is "if_statement" prefix 4)
+         ((parent-is "compound_statement") node-is "for_statement" prefix 4)
+         ((parent-is "compound_statement") node-is "while_statement" prefix 4)
+         ((parent-is "compound_statement") node-is "return_statement" prefix 4)
+
+         ;; Namespace indentation (Inner style)
+         ((parent-is "namespace_definition") (child-is "declaration") prefix 4)
+         ((parent-is "namespace_definition") (child-is "namespace_definition") prefix 4)
+
+         ;; Default: no extra indentation for top-level items
+         (node-is "translation_unit" node-is "declaration" no-indent)
+         )))
 (add-hook 'c-mode-hook 'my-setup-c-style)
 (add-hook 'c++-mode-hook 'my-setup-c-style)
-;; (add-hook 'c-ts-mode-hook 'my-setup-c-style)
-;; (add-hook 'c++-ts-mode-hook 'my-setup-c-style)
-
-(use-package c-ts-mode
-  :ensure nil
-  :config
-  ;; Set up treesit for syntax highlighting only
-  (when (treesit-ready-p 'c)
-    (define-derived-mode my-c-ts-mode c-ts-mode "C (treesit+ccmode)"
-      "C mode with tree-sitter highlighting and CC Mode indentation."
-
-      ;; Keep treesit font-lock (syntax highlighting)
-      (treesit-major-mode-setup)
-
-      ;; Override indentation to use CC Mode
-      ;; This is the key: replace treesit's indent functions with CC Mode's
-      (setq-local indent-line-function #'c-indent-line)
-      (setq-local indent-region-function #'c-indent-region)
-
-      ;; Apply CC Mode indentation settings
-      (c-mode-common-hook)
-      (c-set-style "llvm-allman")
-      (setq-local c-basic-offset 4)
-      (setq-local indent-tabs-mode nil)
-      (setq-local tab-width 4)
-      (setq-local fill-column 120)))
-
-  ;; Auto-use this mode for C files
-  (add-to-list 'major-mode-remap-alist '(c-mode . my-c-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c++-mode . my-c++-ts-mode)))
-
-(use-package c++-ts-mode
-  :ensure nil
-  :config
-  (when (treesit-ready-p 'c++)
-    (define-derived-mode my-c++-ts-mode c++-ts-mode "C++ (treesit+ccmode)"
-      "C++ mode with tree-sitter highlighting and CC Mode indentation."
-
-      (treesit-major-mode-setup)
-
-      ;; Override to CC Mode indentation
-      (setq-local indent-line-function #'c-indent-line)
-      (setq-local indent-region-function #'c-indent-region)
-
-      ;; CC Mode settings
-      (c-mode-common-hook)
-      (c-set-style "llvm-allman")
-      (setq-local c-basic-offset 4)
-      (setq-local indent-tabs-mode nil)
-      (setq-local tab-width 4)
-      (setq-local fill-column 120)))
-
-  (add-to-list 'major-mode-remap-alist '(c++-mode . my-c++-ts-mode)))
+(add-hook 'c-ts-mode-hook 'my-setup-c-style)
+(add-hook 'c++-ts-mode-hook 'my-setup-c-style)
 
 
 ;;;; Snippets
