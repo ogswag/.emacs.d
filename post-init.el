@@ -312,18 +312,12 @@ Useful when a theme partially loads with errors."
 (use-package leuven-theme
   :ensure t)
 
-(use-package fleetish-theme
-  :ensure t)
-
 (setq-default spacemacs-theme-org-height t)
-(setq-default spacemacs-theme-org-highlight t)
-
-(setq-default doom-immaterial-dark-brighter-modeline t)
 
 (use-package auto-dark
   :ensure t
   :custom
-  (auto-dark-themes '((fleetish) (tango-plus)))
+  (auto-dark-themes '((spacemacs-dark) (tango-plus)))
   (auto-dark-polling-interval-seconds 5)
   (auto-dark-allow-osascript t)
   :init (auto-dark-mode)
