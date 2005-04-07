@@ -6,10 +6,13 @@
 ;;; Emacs System Options and Packages
 ;;;; General System Options and Packages
 
+;; Only use exec-path-from-shell on macOS
 (use-package exec-path-from-shell
-  :ensure t)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
+  :ensure t
+  :if (eq system-type 'darwin)
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
 
 ;; Optimization: Native Compilation
 (use-package compile-angel
@@ -46,7 +49,14 @@
   :custom
   (reverse-im-input-methods '("russian-computer"))
   :config
-  (reverse-im-mode t))
+  (reverse-im-mode t)
+  ;; On Linux with Fcitx/IBus, also configure native input method
+  (when (eq system-type 'gnu/linux)
+    ;; Try to use IBus if available
+    (if-let* ((ibus-method (getenv "IBUS_ADDRESS")))
+        (message "IBus detected, using native input method")
+      ;; Fall back to reverse-im
+      (message "Using reverse-im for Russian input"))))
 
 (use-package visual-line-mode
   :ensure nil
@@ -62,6 +72,17 @@
   (setq pixel-scroll-precision-use-momentum nil) ; Precise/smoother scrolling
   (pixel-scroll-precision-mode 1))
 
+;; On Linux, be more conservative with frame creation
+(when (eq system-type 'gnu/linux)
+  ;; Prefer splitting existing windows over creating new frames
+  (setq pop-up-frames nil)
+  (setq pop-up-windows t))
+
+(when (and (not (eq system-type 'darwin))
+           (fboundp 'pixel-scroll-precision-mode))
+  ;; On Linux/Windows, use less aggressive scrolling
+  (pixel-scroll-precision-mode 0))
+
 (scroll-bar-mode t)
 
 ;; Allow Emacs to upgrade built-in packages, such as Org mode
@@ -75,9 +96,21 @@
 ;; mouse-hover hints) will appear as native system tooltips (pop-up windows),
 ;; rather than as echo area messages. This is useful in graphical Emacs sessions
 ;; where tooltips can appear near the cursor.
-(setq tooltip-hide-delay 20)    ; Time in seconds before a tooltip disappears (default: 10)
-(setq tooltip-delay 0.4)        ; Delay before showing a tooltip after mouse hover (default: 0.7)
-(setq tooltip-short-delay 0.08) ; Delay before showing a short tooltip (Default: 0.1)
+;; Adjust tooltip delays based on platform (macOS has better rendering)
+(setq tooltip-hide-delay 20)
+(cond
+ ((eq system-type 'darwin)
+  ;; macOS: Can use tighter delays due to better font rendering
+  (setq tooltip-delay 0.4)
+  (setq tooltip-short-delay 0.08))
+ ((eq system-type 'gnu/linux)
+  ;; Linux: Use slightly longer delays for readability
+  (setq tooltip-delay 0.6)
+  (setq tooltip-short-delay 0.12))
+ (t
+  ;; Windows: Even longer delays
+  (setq tooltip-delay 0.8)
+  (setq tooltip-short-delay 0.15)))
 (tooltip-mode 1)
 
 (setq-default cursor-type 'bar)
@@ -135,9 +168,6 @@
 ;; Enables visual indication of minibuffer recursion depth after initialization.
 (add-hook 'after-init-hook #'minibuffer-depth-indicate-mode)
 
-;; Enables visual indication of minibuffer recursion depth after initialization.
-(add-hook 'after-init-hook #'minibuffer-depth-indicate-mode)
-
 ;;;; Dired
 ;; Constrain vertical cursor movement to lines within the buffer
 (setq dired-movement-style 'bounded-files)
@@ -148,45 +178,83 @@
 (add-hook 'dired-mode-hook #'dired-hide-details-mode)
 
 ;; Hide files from dired
-(setq dired-omit-files (concat "\\`[.]\\'"
-                               "\\|\\(?:\\.js\\)?\\.meta\\'"
-                               "\\|\\.\\(?:elc|a\\|o\\|pyc\\|pyo\\|swp\\|class\\)\\'"
-                               "\\|^\\.DS_Store\\'"
-                               "\\|^\\.\\(?:svn\\|git\\)\\'"
-                               "\\|^\\.ccls-cache\\'"
-                               "\\|^__pycache__\\'"
-                               "\\|^\\.project\\(?:ile\\)?\\'"
-                               "\\|^flycheck_.*"
-                               "\\|^flymake_.*"))
+(setq dired-omit-files
+      (rx (or
+           ;; 1. Current (.) and parent (..) directories
+           (seq bos "." eos)
+           (seq bos ".." eos)
+
+           ;; 2. File extensions (compiled files, swap files, etc.)
+           (seq "." (or "elc" "a" "o" "pyc" "pyo" "swp" "class") eos)
+
+           ;; 3. Metadata files
+           (seq (opt ".js") ".meta" eos)
+           (seq bos ".DS_Store" eos)
+           (seq bos ".project" (opt "ile") eos)
+
+           ;; 4. Version control and cache directories
+           (seq bos "." (or "svn" "git") eos)
+           (seq bos ".ccls-cache" eos)
+           (seq bos "__pycache__" eos)
+
+           ;; 5. Temporary check files (Flycheck/Flymake)
+           (seq bos "flycheck_")
+           (seq bos "flymake_"))))
 (add-hook 'dired-mode-hook #'dired-omit-mode)
 
 ;; dired: Group directories first
-(with-eval-after-load 'dired
-  (let ((args "--group-directories-first -ahlv"))
-    (when (or (eq system-type 'darwin) (eq system-type 'berkeley-unix))
-      (if-let* ((gls (executable-find "gls")))
-          (setq insert-directory-program gls)
-        (setq args nil)))
-    (when args
-      (setq dired-listing-switches args))))
+(defun my/setup-dired-listing ()
+  "Configure dired with OS-appropriate ls options."
+  (with-eval-after-load 'dired
+    (let ((args "--group-directories-first -ahlv"))
+      (cond
+       ;; macOS: Try to use GNU ls (gls from homebrew)
+       ((eq system-type 'darwin)
+        (if-let* ((gls (executable-find "gls")))
+            (setq insert-directory-program gls)
+          ;; Fall back to BSD ls if gls not available
+          (setq args nil)))
 
-;; dired: Group directories first
-(with-eval-after-load 'dired
-  (let ((args "--group-directories-first -ahlv"))
-    (when (or (eq system-type 'darwin) (eq system-type 'berkeley-unix))
-      (if-let* ((gls (executable-find "gls")))
-          (setq insert-directory-program gls)
-        (setq args nil)))
-    (when args
-      (setq dired-listing-switches args))))
+       ;; Linux: Use native ls which is GNU ls by default
+       ((eq system-type 'gnu/linux)
+        ;; args is already correct for GNU ls
+        )
+
+       ;; Windows: Use different args for ls from Git Bash or similar
+       ((eq system-type 'windows-nt)
+        ;; Windows ls might not support all flags
+        (setq args "-ahlv")))
+
+      ;; Apply the listing switches if they were set
+      (when args
+        (setq dired-listing-switches args)))))
+
+(add-hook 'after-init-hook #'my/setup-dired-listing)
 
 ;;;; EShell
 
 ;; (use-package pcmpl-args
 ;; :ensure t)
 
-(use-package pcmpl-homebrew
-  :ensure t)
+;; Only load macOS-specific package managers on macOS
+(when (eq system-type 'darwin)
+  (use-package pcmpl-homebrew
+    :ensure t))
+
+;; Linux-specific completions (apt, pacman, etc.)
+(when (eq system-type 'gnu/linux)
+  ;; For Debian/Ubuntu systems
+  (when (or (file-exists-p "/etc/debian_version")
+            (file-exists-p "/etc/ubuntu_version"))
+    (use-package pcmpl-apt
+      :ensure t
+      :if (fboundp 'pcomplete/apt)))
+
+  ;; For Arch/Manjaro systems
+  (when (file-exists-p "/etc/arch-release")
+    (use-package pcmpl-pacman
+      :ensure t
+      :if (fboundp 'pcomplete/pacman))))
 
 (use-package pcmpl-pip
   :ensure t)
@@ -322,52 +390,87 @@ Useful when a theme partially loads with errors."
                       (7 . (bold 1.0))
                       (8 . (bold 1.0)))))
 
-;; Apply colorful foreground, background, and overline (headings 0-8)
-(setq modus-themes-common-palette-overrides
-      '((      fg-heading-1 blue-warmer)
-        (      bg-heading-1 bg-blue-nuanced)
-        (overline-heading-1 blue)
-        (      fg-heading-2 cyan-faint)
-        (      bg-heading-2 bg-cyan-nuanced)
-        (overline-heading-2 cyan-faint)
-        (      fg-heading-3 green-faint)
-        (      bg-heading-3 bg-green-nuanced)
-        (overline-heading-3 green-faint)
-        (      fg-heading-4 "#AED581")
-        (      bg-heading-4 "#1F2900")
-        (overline-heading-4 "#AED581")
-        (      fg-heading-5 magenta-cooler)
-        (      bg-heading-5 bg-magenta-nuanced)
-        (overline-heading-5 magenta-cooler)
-        (      fg-heading-6 red)
-        (      bg-heading-6 bg-red-nuanced)
-        (overline-heading-6 red)
-        (      fg-heading-7 "#FF8226")
-        (      bg-heading-7 "#2A1900")
-        (overline-heading-7 "#FF8226")
-        (      fg-heading-8 yellow)
-        (      bg-heading-8 bg-yellow-nuanced)
-        (overline-heading-8 yellow)
-        (fringe unspecified)
-        (fg-line-number-inactive "gray50")
-        (fg-line-number-active fg-main)
-        (bg-line-number-inactive unspecified)
-        (bg-line-number-active unspecified)
-        (bg-prose-block-contents bg-diff-context)
-        (bg-prose-block-delimiter bg-tab-bar)
-        (fg-prose-block-delimiter "gray80")))
+(setq-default modus-vivendi-palette-overrides
+              '((      fg-heading-1 blue-warmer)
+                (      bg-heading-1 bg-blue-nuanced)
+                (overline-heading-1 blue)
+                (      fg-heading-2 cyan-faint)
+                (      bg-heading-2 bg-cyan-nuanced)
+                (overline-heading-2 cyan-faint)
+                (      fg-heading-3 fg-sage)
+                (      bg-heading-3 bg-sage)
+                (overline-heading-3 fg-sage)
+                (      fg-heading-4 green-faint)
+                (      bg-heading-4 bg-green-nuanced)
+                (overline-heading-4 green-faint)
+                (      fg-heading-5 magenta-cooler)
+                (      bg-heading-5 bg-magenta-nuanced)
+                (overline-heading-5 magenta-cooler)
+                (      fg-heading-6 red)
+                (      bg-heading-6 bg-red-nuanced)
+                (overline-heading-6 red)
+                (      fg-heading-7 rust)
+                (      bg-heading-7 bg-changed-faint)
+                (overline-heading-7 rust)
+                (      fg-heading-8 yellow)
+                (      bg-heading-8 bg-yellow-nuanced)
+                (overline-heading-8 yellow)
+                (fringe unspecified)
+                (fg-line-number-inactive "gray50")
+                (fg-line-number-active fg-main)
+                (bg-line-number-inactive unspecified)
+                (bg-line-number-active unspecified)
+                (bg-prose-block-contents bg-diff-context)
+                (bg-prose-block-delimiter bg-tab-bar)
+                (fg-prose-block-delimiter "gray80")))
+
+(setq-default modus-operandi-palette-overrides
+              '((      fg-heading-1 blue-warmer)
+                (      bg-heading-1 bg-blue-nuanced)
+                (overline-heading-1 blue)
+                (      fg-heading-2 cyan-faint)
+                (      bg-heading-2 bg-cyan-nuanced)
+                (overline-heading-2 cyan-faint)
+                (      fg-heading-3 fg-sage)
+                (      bg-heading-3 bg-sage)
+                (overline-heading-3 fg-sage)
+                (      fg-heading-4 green-faint)
+                (      bg-heading-4 bg-green-nuanced)
+                (overline-heading-4 green-faint)
+                (      fg-heading-5 magenta-cooler)
+                (      bg-heading-5 bg-magenta-nuanced)
+                (overline-heading-5 magenta-cooler)
+                (      fg-heading-6 red)
+                (      bg-heading-6 bg-red-nuanced)
+                (overline-heading-6 red)
+                (      fg-heading-7 rust)
+                (      bg-heading-7 bg-changed-faint)
+                (overline-heading-7 rust)
+                (      fg-heading-8 yellow)
+                (      bg-heading-8 bg-yellow-nuanced)
+                (overline-heading-8 yellow)
+                (fringe unspecified)
+                (fg-line-number-inactive "gray50")
+                (fg-line-number-active fg-main)
+                (bg-line-number-inactive unspecified)
+                (bg-line-number-active unspecified)
+                (bg-prose-block-contents bg-diff-context)
+                (bg-prose-block-delimiter bg-tab-bar)
+                (fg-prose-block-delimiter "gray22")))
 
 (setq-default spacemacs-theme-org-height t)
-(setq-default doom-immaterial-dark-brighter-modeline t)
 
-(use-package auto-dark
+(setq calendar-latitude 55.75     ; Moscow
+      calendar-longitude 37.62)
+
+;; Install circadian from ELPA
+(use-package circadian
   :ensure t
-  :custom
-  (auto-dark-themes '((modus-vivendi) (tango-plus)))
-  (auto-dark-polling-interval-seconds 5)
-  (auto-dark-allow-osascript t)
-  :init (auto-dark-mode)
-  )
+  :config
+  (setq circadian-themes
+        '((:sunrise . modus-operandi)
+          (:sunset  . modus-vivendi)))
+  (circadian-setup))
 
 ;;;; Line numbers
 ;; Display the current line and column numbers in the mode line
@@ -403,11 +506,6 @@ Useful when a theme partially loads with errors."
 
 (use-package multiple-cursors
   :ensure t)
-
-(keymap-global-unset "M-<mouse-1>")
-(keymap-global-unset "M-<drag-mouse-1>")
-(keymap-global-set "M-<down-mouse-1>" #'mc/add-cursor-on-click)
-(keymap-global-set "M-m" #'mc/mark-all-dwim)
 
 ;; Whitespace color corrections.
 (require 'color)
@@ -635,60 +733,10 @@ Useful when a theme partially loads with errors."
   (embark-collect-mode . consult-preview-at-point-mode))
 
 
-(keymap-global-unset "M-c")
 ;; Consult offers a suite of commands for efficient searching, previewing, and
 ;; interacting with buffers, file contents, and more, improving various tasks.
 (use-package consult
   :ensure t
-  :bind (;; C-c bindings in `mode-specific-map'
-         ("M-c M-x" . consult-mode-command)
-         ("M-c h" . consult-history)
-         ("M-c k" . consult-kmacro)
-         ("M-c m" . consult-man)
-         ("M-c i" . consult-info)
-         ("M-c r" . consult-recent-file)
-         ("M-c b" . consult-buffer)
-         ("M-c l" . consult-line)
-         ([remap Info-search] . consult-info)
-         ;; C-x bindings in `ctl-x-map'
-         ("C-x M-:" . consult-complex-command)
-
-         ;; Custom M-# bindings for fast register access
-         ("M-#" . consult-register-load)
-         ("M-'" . consult-register-store)
-         ("C-M-#" . consult-register)
-         ;; Other custom bindings
-         ("M-y" . consult-yank-pop)
-         ;; M-g bindings in `goto-map'
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)
-         ("M-g g" . consult-goto-line)
-         ("M-g M-g" . consult-goto-line)
-         ("M-g o" . consult-outline)
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ;; M-s bindings in `search-map'
-         ("M-s d" . consult-find)
-         ("M-s c" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s L" . consult-line-multi)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ;; Isearch integration
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-e" . consult-isearch-history)
-         ("M-s e" . consult-isearch-history)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ;; Minibuffer history
-         :map minibuffer-local-map
-         ("M-s" . consult-history)
-         ("M-r" . consult-history))
 
   ;; Enable automatic preview at point in the *Completions* buffer.
   :hook (completion-list-mode . consult-preview-at-point-mode)
@@ -822,7 +870,7 @@ Useful when a theme partially loads with errors."
   :config
   (mason-setup))
 (mason-setup
-  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier"))
+  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier" "digestif" "tex-fmt"))
     (unless (mason-installed-p pkg)
       (ignore-errors (mason-install pkg)))))
 
@@ -960,6 +1008,18 @@ Useful when a theme partially loads with errors."
 
 ;;; Programming Languages
 
+;;;; Flycheck (on the fly syntax checking)
+(use-package flycheck
+  :ensure t
+  :custom (flycheck-highlighting-mode 'symbols)
+  :init (global-flycheck-mode))
+
+;;;; rainbow-delimeters
+(use-package rainbow-delimiters
+  :ensure t
+  :hook ((prog-mode . rainbow-delimiters-mode)
+         (LaTeX-mode . rainbow-delimiters-mode)))
+
 ;;;; ssh
 (use-package ssh-config-mode
   :ensure t)
@@ -974,7 +1034,7 @@ Useful when a theme partially loads with errors."
 
 ;;;; Python
 ;; (setq python-shell-interpreter "python3")
-(defun my-python-send-buffer-and-switch-to-shell ()
+(defun my/python-send-buffer-and-switch-to-shell ()
   "Send buffer to Python process and switch to its frame/window without splitting."
   (interactive)
   (python-shell-send-buffer)
@@ -993,14 +1053,14 @@ Useful when a theme partially loads with errors."
      (t
       (error "No Python shell buffer found")))))
 
-(defun my-add-python-keybindings ()
+(defun my/add-python-keybindings ()
   "Add custom keybindings to Python modes."
   (when (derived-mode-p 'python-mode)
-    (local-set-key (kbd "C-c C-c") 'my-python-send-buffer-and-switch-to-shell)))
+    (local-set-key (kbd "C-c C-c") 'my/python-send-buffer-and-switch-to-shell)))
 
 ;; Add to both python-mode and python-ts-mode hooks
-(add-hook 'python-mode-hook 'my-add-python-keybindings)
-(add-hook 'python-ts-mode-hook 'my-add-python-keybindings)
+(add-hook 'python-mode-hook 'my/add-python-keybindings)
+(add-hook 'python-ts-mode-hook 'my/add-python-keybindings)
 
 ;;;; Vimrc
 (use-package vimrc-mode

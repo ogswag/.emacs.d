@@ -22,7 +22,12 @@
 
 ;;; Code:
 
-;;; Internal variables
+;;;; Platform Detection
+(defconst my/is-mac (eq system-type 'darwin))
+(defconst my/is-linux (eq system-type 'gnu/linux))
+(defconst my/is-windows (eq system-type 'windows-nt))
+
+;;;; Internal variables
 
 ;; Backup of `gc-cons-threshold' and `gc-cons-percentage' before startup.
 (defvar minimal-emacs--backup-gc-cons-threshold gc-cons-threshold)
@@ -33,7 +38,7 @@
 (setq gc-cons-threshold most-positive-fixnum)
 (setq gc-cons-percentage 1.0)
 
-;;; Variables
+;;;; Variables
 
 (defvar minimal-emacs-ui-features '()
   "List of user interface features to enable in minimal Emacs setup.
@@ -105,7 +110,7 @@ of the progress or any relevant activities during startup.")
   "Directory beneath minimal-emacs.d files are placed.
 Note that this should end with a directory separator.")
 
-;;; Load pre-early-init.el
+;;;; Load pre-early-init.el
 
 ;; Prefer loading newer compiled files
 (setq load-prefer-newer t)
@@ -159,7 +164,7 @@ pre-early-init.el, and post-early-init.el.")
 
 (setq custom-file (expand-file-name "custom.el" minimal-emacs-user-directory))
 
-;;; Garbage collection
+;;;; Garbage collection
 ;; Garbage collection significantly affects startup times. This setting delays
 ;; garbage collection during startup but will be reset later.
 
@@ -186,7 +191,7 @@ pre-early-init.el, and post-early-init.el.")
     (setq gc-cons-threshold minimal-emacs--backup-gc-cons-threshold)
     (setq gc-cons-percentage minimal-emacs--backup-gc-cons-percentage)))
 
-;;; Native compilation and Byte compilation
+;;;; Native compilation and Byte compilation
 
 (if (and (featurep 'native-compile)
          (fboundp 'native-comp-available-p)
@@ -204,7 +209,7 @@ pre-early-init.el, and post-early-init.el.")
 (setq byte-compile-warnings minimal-emacs-debug
       byte-compile-verbose minimal-emacs-debug)
 
-;;; Miscellaneous
+;;;; Miscellaneous
 
 (set-language-environment "UTF-8")
 
@@ -233,7 +238,7 @@ pre-early-init.el, and post-early-init.el.")
 ;; Disable warnings from the legacy advice API. They aren't useful.
 (setq ad-redefinition-action 'accept)
 
-;;; Performance: Miscellaneous options
+;;;; Performance: Miscellaneous options
 
 ;; Font compacting can be very resource-intensive, especially when rendering
 ;; icon fonts on Windows. This will increase memory usage.
@@ -291,7 +296,7 @@ pre-early-init.el, and post-early-init.el.")
     (unless (memq initial-window-system '(x pgtk))
       (setq command-line-x-option-alist nil))))
 
-;;; Performance: File-name-handler-alist
+;;;; Performance: File-name-handler-alist
 
 (defvar minimal-emacs--old-file-name-handler-alist (default-toplevel-value
                                                     'file-name-handler-alist))
@@ -340,7 +345,7 @@ this stage of initialization."
   (add-hook 'emacs-startup-hook #'minimal-emacs--restore-file-name-handler-alist
             101))
 
-;;; Performance: Inhibit redisplay
+;;;; Performance: Inhibit redisplay
 
 (defun minimal-emacs--reset-inhibit-redisplay ()
   "Reset inhibit redisplay."
@@ -356,7 +361,7 @@ this stage of initialization."
   (setq-default inhibit-redisplay t)
   (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-redisplay -100))
 
-;;; Performance: Inhibit message
+;;;; Performance: Inhibit message
 
 (defun minimal-emacs--reset-inhibit-message ()
   "Reset inhibit message."
@@ -370,7 +375,7 @@ this stage of initialization."
   (setq-default inhibit-message t)
   (add-hook 'post-command-hook #'minimal-emacs--reset-inhibit-message -100))
 
-;;; Performance: Disable mode-line during startup
+;;;; Performance: Disable mode-line during startup
 
 (when (and minimal-emacs-disable-mode-line-during-startup
            (not (daemonp))
@@ -383,7 +388,7 @@ this stage of initialization."
     (with-current-buffer buf
       (setq mode-line-format nil))))
 
-;;; Restore values
+;;;; Restore values
 
 (defun minimal-emacs--startup-load-user-init-file (fn &rest args)
   "Advice to reset `mode-line-format'. FN and ARGS are the function and args."
@@ -405,7 +410,7 @@ this stage of initialization."
 (advice-add 'startup--load-user-init-file :around
             #'minimal-emacs--startup-load-user-init-file)
 
-;;; UI elements
+;;;; UI elements
 
 (setq frame-title-format minimal-emacs-frame-title-format
       icon-title-format minimal-emacs-frame-title-format)
@@ -459,12 +464,12 @@ this stage of initialization."
   (setq use-file-dialog nil)
   (setq use-dialog-box nil))
 
-;;; Security
+;;;; Security
 (setq gnutls-verify-error t)  ; Prompts user if there are certificate issues
 (setq tls-checktrust t)  ; Ensure SSL/TLS connections undergo trust verification
 (setq gnutls-min-prime-bits 3072)  ; Stronger GnuTLS encryption
 
-;;; package.el
+;;;; package.el
 (setq use-package-compute-statistics minimal-emacs-debug)
 
 ;; Setting use-package-expand-minimally to (t) results in a more compact output
@@ -485,7 +490,7 @@ this stage of initialization."
                                    ("melpa"  . 70)
                                    ("melpa-stable" . 50)))
 
-;;; Load post-early-init.el
+;;;; Load post-early-init.el
 (minimal-emacs-load-user-init "post-early-init.el")
 
 ;; Local variables:
