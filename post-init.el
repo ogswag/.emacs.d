@@ -833,7 +833,7 @@
 ;;; Programming Languages
 
 ;;;; Python
-(setq python-shell-interpreter "python3")
+;; (setq python-shell-interpreter "python3")
 
 ;;;; Vimrc
 (use-package vimrc-mode
