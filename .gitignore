@@ -1,0 +1,16 @@
+custom.el
+.cache
+autosave
+easysession
+eln-cache
+elpa
+history
+mason
+projects.eld
+recentf.eld
+saveplace
+straight
+tramp
+transient
+tree-sitter
+undo-fu-session
