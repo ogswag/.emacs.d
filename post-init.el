@@ -345,9 +345,23 @@ Useful when a theme partially loads with errors."
           (lambda () (setq-local show-trailing-whitespace t)))
 (add-hook 'prog-mode-hook
           (lambda () (setq-local show-trailing-whitespace t)))
+
 (use-package electric-pair-local-mode
   :ensure nil
   :hook (LaTeX-mode-hook text-mode-hook prog-mode-hook))
+
+(use-package titlecase
+  :ensure t)
+
+(keymap-global-set "M-t" #'titlecase-dwim)
+
+(use-package multiple-cursors
+  :ensure t)
+
+(keymap-global-unset "M-<mouse-1>")
+(keymap-global-unset "M-<drag-mouse-1>")
+(keymap-global-set "M-<down-mouse-1>" #'mc/add-cursor-on-click)
+(keymap-global-set "M-m" #'mc/mark-all-dwim)
 
 ;; Whitespace color corrections.
 (require 'color)
@@ -435,7 +449,7 @@ Useful when a theme partially loads with errors."
   :hook
   (after-init . savehist-mode)
   :custom
-  (savehist-autosave-interval 600)
+  (savehist-autosave-interval 300)
   (savehist-additional-variables
    '(kill-ring                        ; clipboard
      register-alist                   ; macros
