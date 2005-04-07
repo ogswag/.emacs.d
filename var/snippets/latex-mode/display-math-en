@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: display-math-en
+# key: MM
+# --
+\[
+    $0
+\]

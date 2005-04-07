@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: inline-math-en
+# key: mm
+# --
+\\( $0 \\)

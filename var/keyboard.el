@@ -34,8 +34,12 @@
 (keymap-global-set "s-0" #'beginning-of-buffer)
 (keymap-global-set "s-9" #'end-of-buffer)
 
-(keymap-global-set "s-<up>" #'backward-paragraph)
-(keymap-global-set "s-<down>" #'forward-paragraph)
+(keymap-global-unset "M-{")
+(keymap-global-unset "M-}")
+(keymap-global-set "M-[" #'backward-paragraph)
+(keymap-global-set "M-]" #'forward-paragraph)
+(keymap-global-set "s-<up>" #'beginning-of-defun)
+(keymap-global-set "s-<down>" #'end-of-defun)
 
 (keymap-global-set "s-b" #'consult-buffer)
 (keymap-global-unset "C-x b")
@@ -66,7 +70,6 @@
     (delete-region (point) (line-beginning-position)))))
 
 (keymap-global-set "s-<backspace>" #'my-delete-line-backwards)
-
 
 (defun my-move-bol-or-prev-eol ()
   "Move to beginning of line, or to end of previous line if already at bol."

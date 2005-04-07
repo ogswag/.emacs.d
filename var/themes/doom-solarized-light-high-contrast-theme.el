@@ -42,42 +42,41 @@ Can be an integer to determine the exact padding."
   :background-mode 'light
 
   ;; name        default   256       16
-  ((bg         '("#FDF6E3" "#FDF6E3" "white"        ))
-   (fg         '("#002b36" "#002b36" "black"        ))
+  ((bg         '("#fbf8ef" "#fbf8ef" "white"        ))
+   (fg         '("#4a4a4a" "#4a4a4a" "black"        ))
 
-   ;; These are off-color variants of bg/fg, used primarily for `solaire-mode',
-   ;; but can also be useful as a basis for subtle highlights (e.g. for hl-line
-   ;; or region), especially when paired with the `doom-darken', `doom-lighten',
-   ;; and `doom-blend' helper functions.
-   (bg-alt     '("#EEE8D5" "#EEE8D5" "white"        ))
-   (fg-alt     '("#7B8787" "#7B8787" "brightwhite"  ))
+   ;; Muted background variants
+   (bg-alt     '("#f3f0e7" "#f3f0e7" "white"        ))
+   (fg-alt     '("#8a8a8a" "#8a8a8a" "brightwhite"  ))
 
-   ;; These should represent a spectrum from bg to fg, where base0 is a starker
-   ;; bg and base8 is a starker fg. For example, if bg is light grey and fg is
-   ;; dark grey, base0 should be white and base8 should be black.
-   (base0      '("#FFFBF0" "#FFFBF0" "white"        ))
-   (base1      '("#FCF8ED" "#FCF8ED" "brightblack"  ))
-   (base2      '("#FCF7E8" "#FCF7E8" "brightblack"  ))
-   (base3      '("#F2E6CE" "#F2E6CE" "brightblack"  ))
-   (base4      '("#E1DBCD" "#E1DBCD" "brightblack"  ))
-   (base5      '("#D6D6D6" "#D6D6D6" "brightblack"  ))
-   (base6      '("#96A7A9" "#96A7A9" "brightblack"  ))
-   (base7      '("#788484" "#788484" "brightblack"  ))
-   (base8      '("#626C6C" "#626C6C" "black"        ))
+   ;; Base spectrum - softer transitions
+   (base0      '("#fffff8" "#fffff8" "white"        ))
+   (base1      '("#f8f5e7" "#f8f5e7" "brightblack"  ))
+   (base2      '("#f0ede0" "#f0ede0" "brightblack"  ))
+   (base3      '("#e8e5d8" "#e8e5d8" "brightblack"  ))
+   (base4      '("#d8d5c8" "#d8d5c8" "brightblack"  ))
+   (base5      '("#b8b5a8" "#b8b5a8" "brightblack"  ))
+   (base6      '("#98958a" "#98958a" "brightblack"  ))
+   (base7      '("#78756a" "#78756a" "brightblack"  ))
+   (base8      '("#58554a" "#58554a" "black"        ))
+
+   ;; Muted, less saturated colors closer to Spacemacs Light
+   (grey       base5)
+   (red        '("#d33682" "#d33682" "red"          ))  ;; Softer magenta-red
+   (orange     '("#cb4b16" "#cb4b16" "brightred"    ))  ;; Kept original
+   (green      '("#859900" "#859900" "green"        ))  ;; Olive green
+   (teal       '("#2aa198" "#2aa198" "brightgreen"  ))  ;; Cyan-teal
+   (yellow     '("#b58900" "#b58900" "yellow"       ))  ;; Mustard yellow
+   (blue       '("#487CA1" "#487CA1" "brightblue"   ))  ;; Softer blue
+   (dark-blue  '("#657b83" "#657b83" "blue"         ))  ;; Desaturated blue-gray
+   (magenta    '("#B55EA8" "#B55EA8" "magenta"      ))  ;; Matching red
+   (violet     '("#6c71c4" "#6c71c4" "brightmagenta"))  ;; Kept original
+   (cyan       '("#2aa198" "#2aa198" "brightcyan"   ))  ;; Matching teal
+   (dark-cyan  '("#586e75" "#586e75" "cyan"         ))  ;; Darker cyan-gray
+
+   ;; Additional Spacemacs-like colors
    (func       '("#6c3163" "#6c3163" "brown"        ))
 
-   (grey       base4)
-   (red        '("#dc322f" "#dc322f" "red"          ))
-   (orange     '("#cb4b16" "#cb4b16" "brightred"    ))
-   (green      '("#088600" "#088600" "green"        ))
-   (teal       '("#007E60" "#007E60" "brightgreen"  ))
-   (yellow     '("#987B00" "#987B00" "yellow"       ))
-   (blue       '("#006ED9" "#006ED9" "brightblue"   ))
-   (dark-blue  '("#007B9C" "#007B9C" "blue"         ))
-   (magenta    '("#DE006B" "#DE006B" "magenta"      ))
-   (violet     '("#6c71c4" "#6c71c4" "brightmagenta"))
-   (cyan       '("#00807B" "#00807B" "brightcyan"   ))
-   (dark-cyan  '("#00524F" "#00524F" "cyan"         ))
 
    ;; face categories -- required for all themes
    (highlight      blue)
@@ -89,7 +88,7 @@ Can be an integer to determine the exact padding."
                      base7))
    (doc-comments   teal)
    (constants      teal)
-   (functions      magenta)
+   (functions      func)
    (keywords       green)
    (methods        cyan)
    (operators      blue)
@@ -120,13 +119,23 @@ Can be an integer to determine the exact padding."
    (modeline-bg
     (if -modeline-bright
         (doom-lighten cyan 0.1)
-      dark-cyan))
+      base7))
    (modeline-bg-alt
     (if -modeline-bright
         (doom-lighten bg 0.7)
       (doom-lighten base3 0.2)))
    (modeline-bg-inactive     (doom-darken bg 0.025))
-   (modeline-bg-inactive-alt (doom-darken bg 0.02)))
+   (modeline-bg-inactive-alt (doom-darken bg 0.02))
+
+   (level-1 magenta)
+   (level-2 green)
+   (level-3 blue)
+   (level-4 yellow)
+   (level-5 cyan)
+   (level-6 magenta)
+   (level-7 green)
+   (level-8 blue)
+   )
 
 
   ;;;; Base theme face overrides
@@ -134,12 +143,12 @@ Can be an integer to determine the exact padding."
     :background (if doom-solarized-light-high-contrast-brighter-comments
                     (doom-blend teal base0 0.07)
                   'unspecified))
-   ((font-lock-type-face &override) :weight 'bold)
+   ((font-lock-type-face &override))
    ((font-lock-builtin-face &override))
-   ((font-lock-function-name-face &override) :foreground type :weight 'bold)
-   ((font-lock-keyword-face &override) :weight 'bold)
+   ((font-lock-function-name-face &override))
+   ((font-lock-keyword-face &override))
    ((font-lock-constant-face &override) :weight 'bold)
-   ((font-lock-string-face &override) :weight)
+   ((font-lock-string-face &override))
    (hl-line :background base3)
    ((line-number &override) :foreground base6)
    ((line-number-current-line &override) :foreground fg :background region :weight 'bold)
@@ -195,16 +204,46 @@ Can be an integer to determine the exact padding."
    (helm-selection :foreground base0 :weight 'bold :background blue)
    ;;;; company
    (company-tooltip-selection :background blue :foreground base3)
-   ;;;; org <built-in>
+
+   ;;;; Org
+   (org-level-1 :foreground level-1 :weight 'bold :height 1.4)
+   (org-level-2 :foreground level-2 :weight 'bold :height 1.3)
+   (org-level-3 :foreground level-3 :weight 'bold :height 1.2)
+   (org-level-4 :foreground level-4 :weight 'bold :height 1.1)
+   (org-level-5 :foreground level-5 :weight 'bold)
+   (org-level-6 :foreground level-6 :weight 'bold)
+   (org-level-7 :foreground level-7 :weight 'bold)
+   (org-level-8 :foreground level-8 :weight 'bold)
    (org-block :background (doom-blend yellow bg 0.04) :extend t)
    (org-block-background :background (doom-blend yellow bg 0.04))
    (org-block-begin-line :background (doom-blend yellow bg 0.08) :extend t)
    (org-block-end-line :background (doom-blend yellow bg 0.08) :extend t)
+   ;; outline
+   (outline-1 :foreground level-1 :weight 'bold :height 1.4)
+   (outline-2 :foreground level-2 :weight 'bold :height 1.3)
+   (outline-3 :foreground level-3 :weight 'bold :height 1.2)
+   (outline-4 :foreground level-4 :weight 'bold :height 1.1)
+   (outline-5 :foreground level-5 :weight 'bold)
+   (outline-6 :foreground level-6 :weight 'bold)
+   (outline-7 :foreground level-7 :weight 'bold)
+   (outline-8 :foreground level-8 :weight 'bold)
+
+
    ;;;; widget
    (widget-field :foreground fg :background base3)
    (widget-single-line-field :foreground fg :background base3)
    ;;;; latex
-   (font-latex-sedate-face :foreground base6)
+   (font-latex-sedate-face :inherit 'font-lock-keyword-face)
+   ;; sectioning
+   (font-latex-sectioning-0-face :foreground fg :weight 'bold :height 1.4)
+   (font-latex-sectioning-1-face :foreground fg :weight 'bold :height 1.4)
+   (font-latex-sectioning-2-face :foreground fg :weight 'bold :height 1.3)
+   (font-latex-sectioning-3-face :foreground fg :weight 'bold :height 1.2)
+   (font-latex-sectioning-4-face :foreground fg :weight 'bold :height 1.1)
+   (font-latex-sectioning-5-face :foreground fg :weight 'bold)
+   (font-latex-sectioning-6-face :foreground fg :weight 'bold)
+   (font-latex-sectioning-7-face :foreground fg :weight 'bold)
+   (font-latex-sectioning-8-face :foreground fg :weight 'bold)
    ;;;; notmuch
    (notmuch-message-summary-face :foreground teal)
    (notmuch-wash-cited-text :foreground base6)

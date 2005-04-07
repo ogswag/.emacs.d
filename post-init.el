@@ -50,7 +50,7 @@
 
 (use-package visual-line-mode
   :ensure nil
-  :hook (LaTeX-mode latex-mode tex-mode eshell-mode text-mode))
+  :hook (LaTeX-mode latex-mode tex-mode eshell-mode text-mode helpful-mode help-mode))
 
 (global-visual-wrap-prefix-mode t)
 (global-goto-address-mode t)
@@ -61,6 +61,8 @@
   (setq ns-pop-up-frames nil)
   (setq pixel-scroll-precision-use-momentum nil) ; Precise/smoother scrolling
   (pixel-scroll-precision-mode 1))
+
+(scroll-bar-mode t)
 
 ;; Allow Emacs to upgrade built-in packages, such as Org mode
 (setq package-install-upgrade-built-in t)
@@ -77,6 +79,8 @@
 (setq tooltip-delay 0.4)        ; Delay before showing a tooltip after mouse hover (default: 0.7)
 (setq tooltip-short-delay 0.08) ; Delay before showing a short tooltip (Default: 0.1)
 (tooltip-mode 1)
+
+(setq-default cursor-type 'bar)
 
 (context-menu-mode t)
 
@@ -209,9 +213,9 @@
   (when (member "Consolas" (font-family-list))
     (set-frame-font "Consolas" t t)))
  ((eq system-type 'darwin) ; macOS
-  (when (member "IBM Plex Mono" (font-family-list))
-    (set-frame-font "IBM Plex Mono Text 14" t t)
-    (set-face-attribute 'fixed-pitch nil :family "IBM Plex Mono")
+  (when (member "JetBrainsMono Nerd Font Mono" (font-family-list))
+    (set-frame-font "JetBrainsMono Nerd Font Mono 14" t t)
+    (set-face-attribute 'fixed-pitch nil :family "JetBrainsMono Nerd Font Mono")
     (set-face-attribute 'variable-pitch nil :family "Helvetica Neue")))
  ((eq system-type 'gnu/linux)
   (when (member "DejaVu Sans Mono" (font-family-list))
@@ -255,16 +259,49 @@
 ;;;; Themes
 (setq-default custom-safe-themes t)
 
+(use-package treesit-auto
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)  ; register all ts-modes
+  (global-treesit-auto-mode))
+
+(require 'treesit)
+
+(setq treesit-language-source-alist
+      '((markdown
+         "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+         "split_parser"
+         "tree-sitter-markdown/src")
+        (markdown_inline
+         "https://github.com/tree-sitter-grammars/tree-sitter-markdown"
+         "split_parser"
+         "tree-sitter-markdown-inline/src")))
+
+(dolist (lang '(markdown markdown_inline))
+  (unless (treesit-language-available-p lang)
+    (treesit-install-language-grammar lang)))
+
 ;; Set the maximum level of syntax highlighting for Tree-sitter modes
 (setq treesit-font-lock-level 4)
+
+(setq-default font-latex-fontify-sectioning 1.3)
 
 (use-package leuven-theme
   :ensure t)
 
+(use-package fleetish-theme
+  :ensure t)
+
+(setq-default spacemacs-theme-org-height t)
+(setq-default spacemacs-theme-org-highlight t)
+
+(setq-default flexoki-themes-use-bold-keywords t)
+
+(setq-default doom-immaterial-dark-brighter-modeline t)
+
 (use-package auto-dark
   :ensure t
   :custom
-  (auto-dark-themes '((wombat) (leuven)))
+  (auto-dark-themes '((doom-immaterial-dark) (spacemacs-light)))
   (auto-dark-polling-interval-seconds 5)
   (auto-dark-allow-osascript t)
   :init (auto-dark-mode)
@@ -278,7 +315,7 @@
 
 ;; Display of line numbers in the buffer:
 (setq-default display-line-numbers-type 'relative)
-(dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+(dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'display-line-numbers-mode))
 (setq-default display-line-numbers-grow-only t)
 (setq-default display-line-numbers-width-start t)
@@ -286,6 +323,9 @@
 ;;; Text editing options and packages
 ;;;; General text editing packages and config
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'prog-mode 'elect)
+(dolist (mode '(LaTeX-mode-hook text-mode-hook prog-mode-hook))
+  (add-hook 'mode #'electric-pair-mode))
 
 ;; Whitespace color corrections.
 (require 'color)
@@ -820,6 +860,8 @@
 
 (use-package meow-tree-sitter
   :ensure t)
+(require 'meow-tree-sitter)
+(meow-tree-sitter-register-defaults)
 
 ;;;; Cool things
 ;;  Draw ▶─UNICODE diagrams─◀ within ▶─your texts─◀ in Emacs
@@ -832,6 +874,10 @@
 
 ;;; Programming Languages
 
+;;;; Perl
+(add-to-list 'auto-mode-alist '("latexmkrc\\'"   . perl-mode))
+(add-to-list 'auto-mode-alist '("\\.latexmkrc\\'". perl-mode))
+
 ;;;; Python
 ;; (setq python-shell-interpreter "python3")
 
@@ -840,7 +886,7 @@
   :ensure t)
 
 ;;;; LaTeX
-;; (load (expand-file-name "latex.el" user-emacs-directory) t t)
+(load (expand-file-name "latex.el" user-emacs-directory) t t)
 ;; Global for LaTeX buffers (LaTeX-mode or AUCTeX)
 (add-hook 'LaTeX-mode-hook
           (lambda ()
@@ -851,8 +897,11 @@
 
 (setq reftex-toc-split-windows-horizontally t)
 (setq reftex-toc-split-windows-fraction 0.2)
-(dolist (mode '(LaTeX-mode latex-mode TeX-latex-mode TeX-mode))
-  (add-hook mode #'reftex-mode))
+
+(use-package reftex
+  :ensure nil
+  :hook (LaTeX-mode TeX-mode))
+
 ;;;; Markdown
 ;; The markdown-mode package provides a major mode for Emacs for syntax
 ;; highlighting, editing commands, and preview support for Markdown documents.
@@ -871,7 +920,6 @@
         ("C-c C-e" . markdown-do)))
 
 ;;;; Typst
-
 (use-package typst-ts-mode
   :ensure t)
 
@@ -885,5 +933,7 @@
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
                                           "typst-lsp"))))))
+;;;; C/C++
+(setq-default c-ts-mode-indent-offset 4)
 
 ;;; post-init.el ends here

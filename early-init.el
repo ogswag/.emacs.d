@@ -22,7 +22,6 @@
 
 ;;; Code:
 
-(add-to-list 'default-frame-alist '(undecorated-round . t))
 ;;; Internal variables
 
 ;; Backup of `gc-cons-threshold' and `gc-cons-percentage' before startup.

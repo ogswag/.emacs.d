@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: remark
+# key: rmrk
+# --
+\begin{remark}[${1:Name}]
+\label{def:${1:$(let ((s (downcase yas-text)))
+                   (replace-regexp-in-string " " "-" s))}}
+$0
+\end{remark}

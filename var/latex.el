@@ -11,6 +11,8 @@
   :hook ((LaTeX-mode . prettify-symbols-mode))
   :bind (:map LaTeX-mode-map
               ("C-S-e" . latex-math-from-calc))
+  :custom
+  (prettify-symbols-unprettify-at-point t)
   :config
   ;; Format math as a Latex string with Calc
   (defun latex-math-from-calc ()
@@ -31,15 +33,47 @@
                                     calc-prefer-frac t
                                     calc-angle-mode rad))))))))
 
+
 (use-package preview
   :ensure nil
   :after latex
   :hook ((LaTeX-mode . preview-larger-previews))
+  :custom
+  (preview-bb-filesize 4096)
+  (preview-TeX-bb-border 2)
+  ;; (preview-prefer-TeX-bb t)
   :config
   (defun preview-larger-previews ()
     (setq preview-scale-function
-          (lambda () (* 1.25
+          (lambda () (* 0.7
                         (funcall (preview-scale-from-face)))))))
+
+(setq org-preview-latex-default-process 'dvisvgm) ; No blur when scaling
+
+(defun my/text-scale-adjust-latex-previews ()
+  "Adjust the size of latex preview fragments when changing the
+buffer's text scale."
+  (pcase major-mode
+    ('LaTeX-mode
+     (dolist (ov (overlays-in (point-min) (point-max)))
+       (if (eq (overlay-get ov 'category)
+               'preview-overlay)
+           (my/text-scale--resize-fragment ov))))
+    ('org-mode
+     (dolist (ov (overlays-in (point-min) (point-max)))
+       (if (eq (overlay-get ov 'org-overlay-type)
+               'org-latex-overlay)
+           (my/text-scale--resize-fragment ov))))))
+
+(defun my/text-scale--resize-fragment (ov)
+  (overlay-put
+   ov 'display
+   (cons 'image
+         (plist-put
+          (cdr (overlay-get ov 'display))
+          :scale (+ 1.0 (* 0.25 text-scale-mode-amount))))))
+
+(add-hook 'text-scale-mode-hook #'my/text-scale-adjust-latex-previews)
 
 ;; CDLatex settings
 (use-package cdlatex
@@ -53,6 +87,9 @@
   :ensure t
   :hook ((LaTeX-mode . yas-minor-mode)
          (post-self-insert . my/yas-try-expanding-auto-snippets))
+  :custom
+  (yas-snippet-dirs '("~/.emacs.d/var/snippets/"
+                      yas-installed-snippets-dir))
   :config
   (use-package warnings
     :config
@@ -68,7 +105,7 @@
     (when (and (boundp 'yas-minor-mode) yas-minor-mode)
       (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
         (yas-expand)))))
-
+(yas-global-mode t)
 ;; CDLatex integration with YaSnippet: Allow cdlatex tab to work inside Yas
 ;; fields
 (use-package cdlatex
