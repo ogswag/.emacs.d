@@ -6,7 +6,7 @@
 ;;; Emacs System Options and Packages
 ;;;; General System Options and Packages
 
-(setq use-package-enable-imenu-support t)
+(setq-default use-package-enable-imenu-support t)
 
 ;; Only use exec-path-from-shell on macOS
 (use-package exec-path-from-shell
@@ -370,6 +370,9 @@
 (use-package leuven-theme
   :ensure t)
 
+(use-package modus-themes
+  :ensure t)
+
 (setq-default modus-themes-headings
               (quote ((0 . (bold 1.8))
                       (1 . (bold 1.8))
@@ -425,9 +428,9 @@
                 (string olive)
                 (operator tangerine)
                 (fnname red-warmer)
-                (fnname-call red-faint)
+                (fnname-call fg-main)
                 (variable fg-ochre)
-                (property fg-ochre)
+                (property fg-main)
                 (variable-use fg-ochre)
                 )
               )
