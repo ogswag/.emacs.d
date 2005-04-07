@@ -179,6 +179,11 @@ c-mode
 ;; fprintf
 (fprintf "fprintf(" (p "stdout") ", \"" (p "format string") "\""
          (p ", variable" nil) ");" n)
+(for "for ("(p "int i = 0")"; "(p "i < limit")"; "(p "++i")")"
+     n
+     "    {"
+     n> q n
+     "    }")
 ;; main
 (main (p "int" return-type) " main("(p "int argc, char *argv[]")")"
       n

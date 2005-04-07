@@ -155,10 +155,10 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 
 (keymap-global-set (my/select-leader "LEADER-<backspace>") #'my/nuke-line-backwards)
 
-(keymap-global-set (my/select-leader "LEADER-h") #'my/move-bol-or-prev-eol)
-(keymap-global-set (my/select-leader "LEADER-l") #'my/move-eol-or-next-bol)
+(keymap-global-set (my/select-leader "LEADER-u") #'my/move-bol-or-prev-eol)
+(keymap-global-set (my/select-leader "LEADER-o") #'my/move-eol-or-next-bol)
 
-(keymap-global-set "s-L" #'meow-line)
+(keymap-global-set "s-l" #'meow-line)
 (keymap-global-set "s-;" #'meow-reverse)
 
 (keymap-global-set "s-/" #'comment-line)

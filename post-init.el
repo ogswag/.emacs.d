@@ -385,7 +385,7 @@
                       (8 . (bold 1.0)))))
 
 (setq modus-vivendi-palette-user
-      '((tangerine "#FF9752")
+      '((apricot "#FF9752")
         (jeans "#6181B8")))
 
 (setq-default modus-vivendi-palette-overrides
@@ -421,17 +421,18 @@
                 (bg-prose-block-contents bg-diff-context)
                 (bg-prose-block-delimiter bg-tab-bar)
                 (fg-prose-block-delimiter "gray80")
-                (cursor red-warmer)
-                (preprocessor yellow-cooler)
+                (cursor red)
+                (preprocessor fg-ochre)
                 (keyword blue-faint)
                 (type blue-faint)
-                (string olive)
-                (operator tangerine)
-                (fnname red-warmer)
+                (fnname fg-ochre)
                 (fnname-call fg-main)
-                (variable fg-ochre)
+                (number cyan-cooler)
+                (variable fg-main)
+                (variable-use fg-main)
                 (property fg-main)
-                (variable-use fg-ochre)
+                (operator apricot)
+                (string olive)
                 )
               )
 
@@ -473,11 +474,17 @@
                 (bg-prose-block-delimiter bg-tab-bar)
                 (fg-prose-block-delimiter "gray22")
                 (cursor red)
-                (preprocessor yellow-cooler)
+                (preprocessor yellow)
                 (keyword sea)
                 (type sea)
+                (fnname yellow)
+                (fnname-call fg-main)
+                (number cyan-intense)
                 (variable fg-main)
-                (operator apricot)))
+                (variable-use fg-main)
+                (property fg-main)
+                (operator apricot)
+                (string green-intense)))
 
 (setq modus-themes-italic-constructs nil
       modus-themes-bold-constructs t)
@@ -654,7 +661,7 @@
 
   :custom
   ;; Hide commands in M-x which do not apply to the current mode.
-  (read-extended-command-predicate #'command-completion-default-include-p)
+  ;; (read-extended-command-predicate #'command-completion-default-include-p)
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
@@ -1125,42 +1132,173 @@
 
 ;;;; C/C++
 (setq-default c-ts-mode-indent-offset 4)
-(setq-default c-default-style '((c-mode . "user")
-                                (c++-mode . "user")
+
+;; Define a custom style matching your clang-format config
+(defconst llvm-allman-style
+  '((c-basic-offset . 4)
+    (c-offsets-alist
+     . ((access-label . -)
+        (annotation-var-cont . 0)
+        (arglist-close . 0)
+        (arglist-intro . +)
+        (block-close . 0)
+        (block-open . 0)
+        (brace-entry-open . 0)
+        (brace-list-close . 0)
+        (brace-list-open . 0)
+        (case-label . +)
+        (class-close . 0)
+        (class-open . 0)
+        (comment-intro . 0)
+        (cpp-macro . -1000)
+        (cpp-macro-cont . +)
+        (defun-close . 0)
+        (defun-open . 0)
+        (extern-lang-close . 0)
+        (extern-lang-open . 0)
+        (friend . 0)
+        (inclass . +)
+        (inextern-lang . 0)
+        (inher-cont . 0)
+        (inher-intro . +)
+        (inline-close . 0)
+        (inline-open . 0)
+        (innamespace . 0)           ; Inner namespace content at column 0
+        (knr-argdecl-intro . 5)
+        (label . 0)
+        (member-init-cont . 0)
+        (member-init-intro . +)
+        (namespace-close . 0)       ; Close namespace at column 0
+        (namespace-open . 0)        ; Start namespace at column 0
+        (statement-case-open . +)
+        (statement-cont . +)
+        (substatement-label . 0)
+        (substatement-open . 0)
+        (template-args-cont c-lineup-template-args +) ; Template handling
+        (topmost-intro . 0)
+        (topmost-intro-cont . 0)
+        ;; Brace placement for Allman style
+        (statement-block-intro . +))))
+  "My personal C/C++ style matching .clang-format configuration.")
+
+;; Register style only for CC-mode
+(c-add-style "llvm-allman" llvm-allman-style)
+
+;; Set default style only for traditional CC-mode
+(setq-default c-default-style '((c-mode . "llvm-allman")
+                                (c++-mode . "llvm-allman")
                                 (java-mode . "java")
                                 (awk-mode . "awk")
                                 (other . "gnu")))
 
-;;; Personal function definitions
-(defun my/nuke-line-backwards ()
-  "Nuke, as in delete without saving to register, line backwards."
-  (interactive)
+(defun my-setup-c-style ()
+  "Setup my personal C/C++ style for all C-like modes."
+  ;; Common settings for all C-like modes
+  (setq-local tab-width 4)
+  (setq-local indent-tabs-mode nil)     ; Use spaces, not tabs
+  (setq-local fill-column 120)          ; Column limit
+  (setq-local comment-column 40)        ; Align comments to column 40
+
+  ;; Electric pair settings for Allman style braces
+  (setq-local electric-pair-preserve-balance t)
+  (setq-local electric-pair-open-newline-between-pairs t)
+
+  ;; Setup specific style based on mode
   (cond
-   ;; If at beginning of line, delete previous newline (join lines)
-   ((= (point) (line-beginning-position))
-    (delete-char -1))
+   ;; For traditional CC-mode (c-mode, c++-mode)
+   ((or (eq major-mode 'c-mode) (eq major-mode 'c++-mode))
+    (setq-local c-basic-offset 4)
+    (setq-local c-cleanup-list
+                '(brace-else-brace
+                  brace-elseif-brace
+                  empty-defun-braces
+                  defun-close-semi
+                  list-close-comma
+                  scope-operator))
+    (setq-local c-hanging-braces-alist
+                '((defun-open after)
+                  (defun-close before after)
+                  (class-open after)
+                  (class-close before after)
+                  (namespace-open after)
+                  (namespace-close before after)
+                  (inline-open after)
+                  (inline-close before after)
+                  (block-open after)
+                  (block-close before after)
+                  (extern-lang-open after)
+                  (extern-lang-close before after)
+                  (statement-case-open after)
+                  (substatement-open after)))
+    ;; Set style only in CC-mode buffers
+    (c-set-style "llvm-allman")
+    (setq-local c-auto-newline 1))
 
-   ;; Otherwise delete to beginning of line
-   (t
-    (delete-region (point) (line-beginning-position)))))
+   ;; For tree-sitter modes (Emacs 29+)
+   ((or (eq major-mode 'c-ts-mode) (eq major-mode 'c++-ts-mode))
+    ;; Set tree-sitter indentation offset
+    ;; (setq-local c-ts-mode-indent-offset 4)
+    ;; (setq-local c-ts-mode-indent-style 'bsd)
+    )))
 
-(defun my/move-bol-or-prev-eol ()
-  "Move to beginning of line, or to end of previous line if already at bol."
-  (interactive)
-  (if (bolp)
-      (progn
-        (forward-line -1)
-        (end-of-line))
-    (beginning-of-line)))
+;; Handle c-or-c++-ts-mode if it exists (some Emacs versions use this)
 
-(defun my/move-eol-or-next-bol ()
-  "Move to beginning of line, or to end of previous line if already at bol."
-  (interactive)
-  (if (eolp)
-      (progn
-        (forward-line 1)
-        (beginning-of-line))
-    (end-of-line)))
+;; Add to all C-like modes
+(add-hook 'c-mode-hook 'my-setup-c-style)
+(add-hook 'c++-mode-hook 'my-setup-c-style)
+;; (add-hook 'c-ts-mode-hook 'my-setup-c-style)
+;; (add-hook 'c++-ts-mode-hook 'my-setup-c-style)
+
+(use-package c-ts-mode
+  :ensure nil
+  :config
+  ;; Set up treesit for syntax highlighting only
+  (when (treesit-ready-p 'c)
+    (define-derived-mode my-c-ts-mode c-ts-mode "C (treesit+ccmode)"
+      "C mode with tree-sitter highlighting and CC Mode indentation."
+
+      ;; Keep treesit font-lock (syntax highlighting)
+      (treesit-major-mode-setup)
+
+      ;; Override indentation to use CC Mode
+      ;; This is the key: replace treesit's indent functions with CC Mode's
+      (setq-local indent-line-function #'c-indent-line)
+      (setq-local indent-region-function #'c-indent-region)
+
+      ;; Apply CC Mode indentation settings
+      (c-mode-common-hook)
+      (c-set-style "llvm-allman")
+      (setq-local c-basic-offset 4)
+      (setq-local indent-tabs-mode nil)
+      (setq-local tab-width 4)
+      (setq-local fill-column 120)))
+
+  ;; Auto-use this mode for C files
+  (add-to-list 'major-mode-remap-alist '(c-mode . my-c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . my-c++-ts-mode)))
+
+(use-package c++-ts-mode
+  :ensure nil
+  :config
+  (when (treesit-ready-p 'c++)
+    (define-derived-mode my-c++-ts-mode c++-ts-mode "C++ (treesit+ccmode)"
+      "C++ mode with tree-sitter highlighting and CC Mode indentation."
+
+      (treesit-major-mode-setup)
+
+      ;; Override to CC Mode indentation
+      (setq-local indent-line-function #'c-indent-line)
+      (setq-local indent-region-function #'c-indent-region)
+
+      ;; CC Mode settings
+      (c-mode-common-hook)
+      (c-set-style "llvm-allman")
+      (setq-local c-basic-offset 4)
+      (setq-local indent-tabs-mode nil)
+      (setq-local tab-width 4)
+      (setq-local fill-column 120)))
+
+  (add-to-list 'major-mode-remap-alist '(c++-mode . my-c++-ts-mode)))
 
 
 ;;;; Snippets
@@ -1199,5 +1337,35 @@
   ;; (global-tempel-abbrev-mode)
   )
 
+;;; Personal function definitions
+(defun my/nuke-line-backwards ()
+  "Nuke, as in delete without saving to register, line backwards."
+  (interactive)
+  (cond
+   ;; If at beginning of line, delete previous newline (join lines)
+   ((= (point) (line-beginning-position))
+    (delete-char -1))
+
+   ;; Otherwise delete to beginning of line
+   (t
+    (delete-region (point) (line-beginning-position)))))
+
+(defun my/move-bol-or-prev-eol ()
+  "Move to beginning of line, or to end of previous line if already at bol."
+  (interactive)
+  (if (bolp)
+      (progn
+        (forward-line -1)
+        (end-of-line))
+    (beginning-of-line)))
+
+(defun my/move-eol-or-next-bol ()
+  "Move to beginning of line, or to end of previous line if already at bol."
+  (interactive)
+  (if (eolp)
+      (progn
+        (forward-line 1)
+        (beginning-of-line))
+    (end-of-line)))
 
 ;;; post-init.el ends here

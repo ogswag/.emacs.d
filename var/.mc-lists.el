@@ -7,6 +7,7 @@
         multiple-cursors-mode
         my-move-bol-or-prev-eol
         my-move-eol-or-next-bol
+        my/nuke-line-backwards
         org-self-insert-command
         ))
 
@@ -15,6 +16,7 @@
         beginning-of-buffer
         cdlatex-pbb
         compile
+        find-file
         next-buffer
         ns-open-file-select-line
         pixel-scroll-precision
