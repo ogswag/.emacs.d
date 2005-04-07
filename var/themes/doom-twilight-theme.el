@@ -14,8 +14,6 @@
 
 (require 'doom-themes)
 
-
-;;
 ;;; Variables
 
 (defgroup doom-twilight-theme nil
@@ -38,8 +36,6 @@ Can be an integer to determine the exact padding."
   :group 'doom-twilight-theme
   :type '(choice integer boolean))
 
-
-;;
 ;;; Theme definition
 
 (def-doom-theme doom-twilight

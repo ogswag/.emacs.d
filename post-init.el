@@ -203,6 +203,9 @@
 (use-package magit
   :ensure t)
 
+;;;; Org Mode
+(load (expand-file-name "org.el" user-emacs-directory) t t)
+
 ;;; Emacs Appearance
 ;; Paren match highlighting
 (add-hook 'after-init-hook #'show-paren-mode)
@@ -213,9 +216,9 @@
   (when (member "Consolas" (font-family-list))
     (set-frame-font "Consolas" t t)))
  ((eq system-type 'darwin) ; macOS
-  (when (member "JetBrainsMono Nerd Font Mono" (font-family-list))
-    (set-frame-font "JetBrainsMono Nerd Font Mono 14" t t)
-    (set-face-attribute 'fixed-pitch nil :family "JetBrainsMono Nerd Font Mono")
+  (when (member "Menlo" (font-family-list))
+    (set-frame-font "Menlo 14" t t)
+    (set-face-attribute 'fixed-pitch nil :family "Menlo")
     (set-face-attribute 'variable-pitch nil :family "Helvetica Neue")))
  ((eq system-type 'gnu/linux)
   (when (member "DejaVu Sans Mono" (font-family-list))
@@ -260,6 +263,7 @@
 (setq-default custom-safe-themes t)
 
 (use-package treesit-auto
+  :ensure t
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)  ; register all ts-modes
   (global-treesit-auto-mode))
@@ -294,8 +298,6 @@
 (setq-default spacemacs-theme-org-height t)
 (setq-default spacemacs-theme-org-highlight t)
 
-(setq-default flexoki-themes-use-bold-keywords t)
-
 (setq-default doom-immaterial-dark-brighter-modeline t)
 
 (use-package auto-dark
@@ -314,7 +316,7 @@
 (setq mode-line-position-column-line-format '("%l:%C"))
 
 ;; Display of line numbers in the buffer:
-(setq-default display-line-numbers-type 'relative)
+;; (setq-default display-line-numbers-type 'relative)
 (dolist (hook '(prog-mode-hook text-mode-hook))
   (add-hook hook #'display-line-numbers-mode))
 (setq-default display-line-numbers-grow-only t)
@@ -323,9 +325,15 @@
 ;;; Text editing options and packages
 ;;;; General text editing packages and config
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-(add-hook 'prog-mode 'elect)
-(dolist (mode '(LaTeX-mode-hook text-mode-hook prog-mode-hook))
-  (add-hook 'mode #'electric-pair-mode))
+(add-hook 'latex-mode-hook
+          (lambda () (setq-local show-trailing-whitespace t)))
+(add-hook 'text-mode-hook
+          (lambda () (setq-local show-trailing-whitespace t)))
+(add-hook 'prog-mode-hook
+          (lambda () (setq-local show-trailing-whitespace t)))
+(use-package electric-pair-local-mode
+  :ensure nil
+  :hook (LaTeX-mode-hook text-mode-hook prog-mode-hook))
 
 ;; Whitespace color corrections.
 (require 'color)
@@ -505,7 +513,7 @@
 (use-package orderless
   :ensure t
   :custom
-  (completion-styles '(orderless basic))
+  (completion-styles '(orderless flex))
   (completion-category-defaults nil)
   (completion-category-overrides '((file (styles partial-completion)))))
 
@@ -874,12 +882,43 @@
 
 ;;; Programming Languages
 
+;;; CSV
+(use-package csv-mode
+  :ensure t)
+
 ;;;; Perl
 (add-to-list 'auto-mode-alist '("latexmkrc\\'"   . perl-mode))
 (add-to-list 'auto-mode-alist '("\\.latexmkrc\\'". perl-mode))
 
 ;;;; Python
 ;; (setq python-shell-interpreter "python3")
+(defun my-python-send-buffer-and-switch-to-shell ()
+  "Send buffer to Python process and switch to its frame/window without splitting."
+  (interactive)
+  (python-shell-send-buffer)
+  (let* ((shell-buffer (python-shell-get-buffer))
+         (shell-window (when shell-buffer (get-buffer-window shell-buffer t)))) ; t = any frame
+    (cond
+     ;; If shell is in another frame, switch to that frame
+     (shell-window
+      (select-frame-set-input-focus (window-frame shell-window))
+      (select-window shell-window)
+      (end-of-buffer))
+     ;; If shell buffer exists but not displayed, display in other frame
+     (shell-buffer
+      (display-buffer-pop-up-frame shell-buffer nil)
+      (end-of-buffer))
+     (t
+      (error "No Python shell buffer found")))))
+
+(defun my-add-python-keybindings ()
+  "Add custom keybindings to Python modes."
+  (when (derived-mode-p 'python-mode)
+    (local-set-key (kbd "C-c C-c") 'my-python-send-buffer-and-switch-to-shell)))
+
+;; Add to both python-mode and python-ts-mode hooks
+(add-hook 'python-mode-hook 'my-add-python-keybindings)
+(add-hook 'python-ts-mode-hook 'my-add-python-keybindings)
 
 ;;;; Vimrc
 (use-package vimrc-mode
@@ -901,6 +940,10 @@
 (use-package reftex
   :ensure nil
   :hook (LaTeX-mode TeX-mode))
+
+(add-to-list 'major-mode-remap-alist '(latex-mode . latex-ts-mode))
+(add-to-list 'major-mode-remap-alist '(LaTeX-mode . latex-ts-mode))
+
 
 ;;;; Markdown
 ;; The markdown-mode package provides a major mode for Emacs for syntax
@@ -933,6 +976,7 @@
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
                                           "typst-lsp"))))))
+
 ;;;; C/C++
 (setq-default c-ts-mode-indent-offset 4)
 
