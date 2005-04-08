@@ -222,7 +222,9 @@
     (set-face-attribute 'variable-pitch nil :family "Helvetica Neue")))
  ((eq system-type 'gnu/linux)
   (when (member "DejaVu Sans Mono" (font-family-list))
-    (set-frame-font "DejaVu Sans Mono" t t))))
+    (set-frame-font "DejaVu Sans Mono 12" t t)
+    (set-face-attribute 'fixed-pitch nil :family "DejaVu Sans Mono")
+    (set-face-attribute 'variable-pitch nil :family "Noto Sans"))))
 
 ;;;; Set Font for Unicode Symbols
 ;; Symbols here mean unicode characters that are math ∫ , tech symbols ⌘ , or dingbats ☭ , but excluding emoji.
@@ -747,6 +749,10 @@
   :ensure t
   :config
   (mason-setup))
+(mason-setup
+  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier"))
+    (unless (mason-installed-p pkg)
+      (ignore-errors (mason-install pkg)))))
 
 ;; Apheleia is an Emacs package designed to run code formatters (e.g., Shfmt,
 ;; Black and Prettier) asynchronously without disrupting the cursor position.
