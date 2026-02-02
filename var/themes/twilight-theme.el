@@ -487,7 +487,7 @@
 
    ;;; Rainbow-parenthesis
    `(show-paren-match ((t (:foreground ,tw-bg :background ,tw-light-org))))
-   `(show-paren-mistmatch ((t (:background ,tw-mg-1 :foreground ,tw-fg))))
+   `(show-paren-mismatch ((t (:background ,tw-mg-1 :foreground ,tw-fg))))
    `(rainbow-delimiters-base-error-face ((t (:foreground ,tw-mg-1))))
    `(rainbow-delimiters-base-face ((t (:foreground ,tw-fg))))
    `(rainbow-delimiters-depth-1-face ((t (:foreground ,rainbow-1))))

@@ -456,30 +456,15 @@
         (sea "#1E417C")))
 
 (setq-default modus-operandi-palette-overrides
-              '((      fg-heading-1 blue-warmer)
-                (      bg-heading-1 bg-blue-nuanced)
-                (overline-heading-1 blue)
+              '(
+                (      fg-heading-1 blue-warmer)
                 (      fg-heading-2 cyan-faint)
-                (      bg-heading-2 bg-cyan-nuanced)
-                (overline-heading-2 cyan-faint)
                 (      fg-heading-3 fg-sage)
-                (      bg-heading-3 bg-sage)
-                (overline-heading-3 fg-sage)
                 (      fg-heading-4 green-faint)
-                (      bg-heading-4 bg-green-nuanced)
-                (overline-heading-4 green-faint)
                 (      fg-heading-5 magenta-cooler)
-                (      bg-heading-5 bg-magenta-nuanced)
-                (overline-heading-5 magenta-cooler)
                 (      fg-heading-6 red)
-                (      bg-heading-6 bg-red-nuanced)
-                (overline-heading-6 red)
                 (      fg-heading-7 rust)
-                (      bg-heading-7 bg-changed-faint)
-                (overline-heading-7 rust)
                 (      fg-heading-8 yellow)
-                (      bg-heading-8 bg-yellow-nuanced)
-                (overline-heading-8 yellow)
                 (fringe unspecified)
                 (fg-line-number-inactive "gray50")
                 (fg-line-number-active fg-main)
@@ -1274,8 +1259,9 @@
 ;; Configure Tempel
 (use-package tempel
   :ensure t
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
+  :bind (:map tempel-map
+              ("<tab>" . tempel-next)
+              ("<backtab>" . tempel-previous))
 
   :init
 

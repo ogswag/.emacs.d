@@ -152,10 +152,10 @@ text-mode
 
 (box "┌─" (make-string (length str) ?─) "─┐" n
      "│ " (s str)                       " │" n
-     "└─" (make-string (length str) ?─) "─┘" n :doc "UNICODE BOX")
+     "└─" (make-string (length str) ?─) "─┘" n q :doc "UNICODE BOX")
 (abox "+-" (make-string (length str) ?-) "-+" n
       "| " (s str)                       " |" n
-      "+-" (make-string (length str) ?-) "-+" n :doc "ASCII BOX")
+      "+-" (make-string (length str) ?-) "-+" n q :doc "ASCII BOX")
 (cut "--8<---------------cut here---------------start------------->8---" n r n
      "--8<---------------cut here---------------end--------------->8---" n)
 (rot13 (p "plain text" text) n "----" n (rot13 text))
@@ -219,7 +219,7 @@ c-mode
          (p ", variable" nil) ");" n)
 (for "for ("(p "int i = 0")"; "(p "i < limit")"; "(p "++i")") {" q "}")
 ;; main
-(main (p "int" return-type) " main("(p "int argc, char *argv[]")")"
+(main "int main("(p "int argc, char *argv[]")")"
       n
       "{"
       n> q n
