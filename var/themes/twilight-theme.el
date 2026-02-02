@@ -1,4 +1,4 @@
-;;; -*- no-byte-compile: t; twilight-theme.el --- Twilight Color Theme for Emacs. -*- lexical-binding: t; -*-
+;;; twilight-theme.el --- Twilight Color Theme for Emacs. -*- lexical-binding: t; -*- no-byte-compile: t;
 
 ;; Copyright (C) 2008 Marcus Crafter <crafterm@redartisan.com>
 ;; Copyright (C) 2015-2017 Jason Blevins <jrblevin@sdf.org>
@@ -54,6 +54,8 @@
 ;; Thanks to Travis Jeffery for ido-mode and fixes to the
 ;; minibuffer-prompt to fit in with the rest of the theme.
 
+;;; Commentary:
+
 ;;; Code:
 
 (deftheme twilight
@@ -90,7 +92,29 @@
       (tw-cy-1        "#41595c")
       (tw-cy          "#5d8084")
       (tw-pale-pur    "#89788a")
-      (tw-med-pur     "#9b859d"))
+      (tw-med-pur     "#9b859d")
+
+      ;; Colors for heading levels ,449CC9,7ADDC8,45D694
+      (level-1 "#FC9B5A")
+      (level-2 "#FA656D")
+      (level-3 "#FDA3CA")
+      (level-4 "#B09EE1")
+      (level-5 "#7F8CC7")
+      (level-6 "#449CC9")
+      (level-7 "#7DDCC7")
+      (level-8 "#4DD391")
+
+      (rainbow-1  "#CF6A4C") ; Rust
+      (rainbow-2  "#CDA869") ; Gold
+      (rainbow-3  "#F9EE98") ; Pale Yellow
+      (rainbow-4  "#8F9D6A") ; Olive
+      (rainbow-5  "#AFC4DB") ; Light Blue
+      (rainbow-6  "#7587A6") ; Periwinkle
+      (rainbow-7  "#5F5A60") ; Grey Purple
+      (rainbow-8  "#9B859D") ; Lavender
+      (rainbow-9  "#EE799F") ;
+
+      )
 
   (custom-theme-set-variables
    'twilight
@@ -102,13 +126,36 @@
    `(cursor ((t (:background ,tw-pale-org))))
    `(buffers-tab ((t (:background ,tw-bg :foreground ,tw-fg-c))))
 
+   ;;; Outline:
+   `(outline-1 ((t (:foreground ,level-1 :height 1.5 :weight bold))))
+   `(outline-2 ((t (:foreground ,level-2 :height 1.4 :weight bold))))
+   `(outline-3 ((t (:foreground ,level-3 :height 1.3 :weight bold))))
+   `(outline-4 ((t (:foreground ,level-4 :height 1.2 :weight bold))))
+   `(outline-5 ((t (:foreground ,level-5 :height 1.1 :weight bold))))
+   `(outline-6 ((t (:foreground ,level-6 :height 1.0 :weight bold))))
+   `(outline-7 ((t (:foreground ,level-7 :height 1.0 :weight bold))))
+   `(outline-8 ((t (:foreground ,level-8 :height 1.0 :weight bold))))
+
+   ;;; LaTeX
+   `(font-latex-sectioning-0-face ((t (:inherit 'outline-8))))
+   `(font-latex-sectioning-1-face ((t (:inherit 'outline-1))))
+   `(font-latex-sectioning-2-face ((t (:inherit 'outline-2))))
+   `(font-latex-sectioning-3-face ((t (:inherit 'outline-3))))
+   `(font-latex-sectioning-4-face ((t (:inherit 'outline-4))))
+   `(font-latex-sectioning-5-face ((t (:inherit 'outline-5))))
+   `(font-latex-sectioning-6-face ((t (:inherit 'outline-6))))
+   `(font-latex-sectioning-7-face ((t (:inherit 'outline-7))))
+   `(font-latex-sectioning-8-face ((t (:inherit 'outline-8))))
+
+   ;;; General
    `(font-lock-warning-face ((t (:background ,tw-mg :foreground ,tw-bg-2))))
    `(font-lock-builtin-face ((t (:foreground ,tw-pale-pur))))
    `(font-lock-comment-face ((t (:foreground ,tw-bg+5 :italic t))))
    `(font-lock-comment-delimiter-face ((t (:foreground ,tw-bg+5))))
    `(font-lock-constant-face ((t (:foreground ,tw-rd))))
    `(font-lock-doc-string-face ((t (:foreground ,tw-med-org))))
-   `(font-lock-function-name-face ((t (:foreground ,tw-dark-org))))
+   `(font-lock-function-name-face ((t (:foreground ,tw-light-org))))
+   `(font-lock-function-call-face ((t (:foreground ,tw-light-org))))
    `(font-lock-keyword-face ((t (:foreground ,tw-pale-org))))
    `(font-lock-preprocessor-face ((t (:foreground ,tw-rd))))
    `(font-lock-string-face ((t (:foreground ,tw-med-grn))))
@@ -118,16 +165,15 @@
    `(font-lock-reference-face ((t (:inherit font-lock-constant-face)))) ; obsolete
    `(font-lock-regexp-grouping-backslash ((t (:foreground ,tw-light-org))))
    `(font-lock-regexp-grouping-construct ((t (:foreground ,tw-mg-1))))
+   `(font-lock-operator-face ((t (:foreground ,tw-pale-org))))
 
-   `(minibuffer-prompt ((t (:foreground ,tw-bg+5))))
+   `(minibuffer-prompt ((t (:foreground ,tw-bg+8))))
    `(fringe ((t (:background ,tw-bg+3 :foreground ,tw-bg+8))))
    `(linum ((t (:background ,tw-bg :foreground ,tw-bg+3))))
    `(linum-highlight-face ((t (:inherit linum :foreground ,tw-pale-org))))
    `(hl-line ((t (:background ,tw-bg+2))))
-   `(mode-line ((t (:background ,tw-bg+3 :foreground ,tw-fg-c
-                                :box (:line-width 1 :color ,tw-fg-c)))))
-   `(mode-line-inactive ((t (:background ,tw-bg+4 :foreground ,tw-bg+8
-                                         :box (:line-width 1 :color ,tw-bg+4)))))
+   `(mode-line ((t (:background ,tw-bg+3 :foreground ,tw-fg+1))))
+   `(mode-line-inactive ((t (:background ,tw-bg+5 :foreground ,tw-fg-c))))
    `(mode-line-buffer-id ((t (:foreground ,tw-med-grn))))
    `(gui-element ((t (:background ,tw-fg-d :foreground ,tw-bg-2))))
    `(region ((t (:background ,tw-bg+3))))
@@ -160,7 +206,14 @@
    ;; Org
    `(org-hide ((((background dark)) (:foreground ,tw-bg))))
    `(org-clock-overlay ((t (:foreground ,tw-wt))))
-   `(outline-4 ((t (:foreground ,tw-bg+8))))
+   `(org-level-1 ((t (:inherit outline-1))))
+   `(org-level-2 ((t (:inherit outline-2))))
+   `(org-level-3 ((t (:inherit outline-3))))
+   `(org-level-4 ((t (:inherit outline-4))))
+   `(org-level-5 ((t (:inherit outline-5))))
+   `(org-level-6 ((t (:inherit outline-6))))
+   `(org-level-7 ((t (:inherit outline-7))))
+   `(org-level-8 ((t (:inherit outline-8))))
 
    ;; Diff
    `(diff-header ((t (:background ,tw-bg+5))))
@@ -426,7 +479,25 @@
    `(orderless-match-face-0 ((t (:foreground ,tw-light-org :weight bold))))
    `(orderless-match-face-1 ((t (:foreground ,tw-med-grn :weight bold))))
    `(orderless-match-face-2 ((t (:foreground ,tw-blu :weight bold))))
-   `(orderless-match-face-3 ((t (:foreground ,tw-pale-pur :weight bold)))))
+   `(orderless-match-face-3 ((t (:foreground ,tw-pale-pur :weight bold))))
+
+   ;;; Rainbow-parenthesis
+   `(show-paren-match ((t (:foreground ,tw-bg :background ,tw-light-org))))
+   `(show-paren-mistmatch ((t (:background ,tw-mg-1 :foreground ,tw-fg))))
+   `(rainbow-delimiters-base-error-face ((t (:foreground ,tw-mg-1))))
+   `(rainbow-delimiters-base-face ((t (:foreground ,tw-fg))))
+   `(rainbow-delimiters-depth-1-face ((t (:foreground ,rainbow-1))))
+   `(rainbow-delimiters-depth-2-face ((t (:foreground ,rainbow-2))))
+   `(rainbow-delimiters-depth-3-face ((t (:foreground ,rainbow-3))))
+   `(rainbow-delimiters-depth-4-face ((t (:foreground ,rainbow-4))))
+   `(rainbow-delimiters-depth-5-face ((t (:foreground ,rainbow-5))))
+   `(rainbow-delimiters-depth-6-face ((t (:foreground ,rainbow-6))))
+   `(rainbow-delimiters-depth-7-face ((t (:foreground ,rainbow-7))))
+   `(rainbow-delimiters-depth-8-face ((t (:foreground ,rainbow-8))))
+   `(rainbow-delimiters-depth-9-face ((t (:foreground ,rainbow-9))))
+   `(rainbow-delimiters-mismatched-face ((t (:background ,tw-mg-1 :foreground ,tw-fg))))
+   `(rainbow-delimiters-unmatched-face ((t (:background ,tw-mg-1 :foreground ,tw-fg))))
+   )
 
   ;; Enable theme
   )

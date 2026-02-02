@@ -345,8 +345,12 @@
   :ensure t
   :custom
   (treesit-auto-install 'prompt)
+  (treesit-auto-langs '(awk bash bibtex blueprint c-sharp clojure cmake commonlisp css
+                            dart dockerfile elixir glsl go gomod heex html janet java
+                            javascript json julia kotlin latex lua magik make markdown nix
+                            nu org perl proto python r ruby rust scala sql surface toml
+                            tsx typescript typst verilog vhdl vue wast wat wgsl yaml))
   :config
-  (treesit-auto-add-to-auto-mode-alist '(python go html css markdown))
   (global-treesit-auto-mode))
 
 (require 'treesit)
@@ -489,7 +493,7 @@
                 (keyword sea)
                 (type sea)
                 (fnname yellow)
-                (fnname-call fg-main)
+                (fnname-call yellow)
                 (number cyan-intense)
                 (variable fg-main)
                 (variable-use fg-main)
@@ -509,7 +513,7 @@
   :config
   (setq circadian-themes
         '((:sunrise . modus-operandi)
-          (:sunset  . modus-vivendi)))
+          (:sunset  . twilight)))
   (circadian-setup))
 
 (use-package beacon

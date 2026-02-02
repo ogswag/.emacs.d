@@ -1,4 +1,4 @@
-;;; -*- no-byte-compile: t; tango-plus-theme.el --- A color theme based on the tango palette  -*- lexical-binding: nil; -*-
+;;; tango-plus-theme.el --- A color theme based on the tango palette  -*- lexical-binding: nil; -*- no-byte-compile: t;
 
 ;; Copyright (C) 2013 Titus von der Malsburg <malsburg@posteo.de>
 
