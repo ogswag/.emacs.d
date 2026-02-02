@@ -94,7 +94,7 @@
       (tw-pale-pur    "#89788a")
       (tw-med-pur     "#9b859d")
 
-      ;; Colors for heading levels ,449CC9,7ADDC8,45D694
+      ;; Colors for heading levels
       (level-1 "#FC9B5A")
       (level-2 "#FA656D")
       (level-3 "#FDA3CA")
