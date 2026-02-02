@@ -206,6 +206,10 @@
    ;; Org
    `(org-hide ((((background dark)) (:foreground ,tw-bg))))
    `(org-clock-overlay ((t (:foreground ,tw-wt))))
+   `(org-verbatim ((t (:foreground ,tw-med-pur))))
+   `(org-block-begin-line ((t (:foreground ,tw-fg-d :background ,tw-bg+4 :extend t))))
+   `(org-block-end-line ((t (:foreground ,tw-fg-d :background ,tw-bg+4 :extend t))))
+   `(org-block ((t (:inherit default :background ,tw-bg+3 :extend t))))
    `(org-level-1 ((t (:inherit outline-1))))
    `(org-level-2 ((t (:inherit outline-2))))
    `(org-level-3 ((t (:inherit outline-3))))
@@ -475,7 +479,7 @@
    ;; Yasnippet
    `(yas-field-highlight-face ((t (:background ,tw-bg+2 :foreground ,tw-pale-org))))
 
-   ;; Orderless
+   ;;; Orderless
    `(orderless-match-face-0 ((t (:foreground ,tw-light-org :weight bold))))
    `(orderless-match-face-1 ((t (:foreground ,tw-med-grn :weight bold))))
    `(orderless-match-face-2 ((t (:foreground ,tw-blu :weight bold))))
