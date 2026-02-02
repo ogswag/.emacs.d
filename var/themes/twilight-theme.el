@@ -165,7 +165,7 @@
    `(font-lock-reference-face ((t (:inherit font-lock-constant-face)))) ; obsolete
    `(font-lock-regexp-grouping-backslash ((t (:foreground ,tw-light-org))))
    `(font-lock-regexp-grouping-construct ((t (:foreground ,tw-mg-1))))
-   `(font-lock-operator-face ((t (:inherit default))))
+   ;; `(font-lock-operator-face ((t (:inherit default))))
 
    `(minibuffer-prompt ((t (:foreground ,tw-bg+8))))
    `(fringe ((t (:background ,tw-bg+3 :foreground ,tw-bg+8))))
@@ -205,6 +205,7 @@
 
    ;; Org
    `(org-hide ((((background dark)) (:foreground ,tw-bg))))
+   `(org-meta-line ((t (:foreground ,tw-blu))))
    `(org-clock-overlay ((t (:foreground ,tw-wt))))
    `(org-verbatim ((t (:foreground ,tw-med-pur))))
    `(org-block-begin-line ((t (:foreground ,tw-fg-d :background ,tw-bg+4 :extend t))))

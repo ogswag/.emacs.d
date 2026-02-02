@@ -1220,16 +1220,17 @@
   (setq-local tab-always-indent 'complete)
 
   ;; Add operator highlighting to C/C++ modes.
-  (font-lock-add-keywords
-   nil
-   `(;; Multi-character operators (higher precedence)
-     ("\\(<<\\|>>\\|<=\\|>=\\|==\\|!=\\|&&\\|||\\|\\+\\+\\|--\\)"
-      1 'font-lock-operator-face prepend)
-
-     ;; Single-character operators
-     ("\\([=+*/%&|^!<>?:~-]\\)"
-      1 'font-lock-operator-face prepend))
-   'append))
+  ;; (font-lock-add-keywords
+  ;;  nil
+  ;;  `(;; Multi-character operators (higher precedence)
+  ;;    ("\\(<<\\|>>\\|<=\\|>=\\|==\\|!=\\|&&\\|||\\|\\+\\+\\|--\\)"
+  ;;     1 'font-lock-operator-face prepend)
+  ;;
+  ;;    ;; Single-character operators
+  ;;    ("\\([=+*/%&|^!<>?:~-]\\)"
+  ;;     1 'font-lock-operator-face prepend))
+  ;;  'append)
+  )
 
 (defun my/tempel-or-indent ()
   "Expand tempel template if possible; otherwise indent."
