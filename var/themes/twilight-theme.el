@@ -104,8 +104,8 @@
       (level-7 "#7DDCC7")
       (level-8 "#4DD391")
 
-      (rainbow-1  "#CF6A4C") ; Rust
-      (rainbow-2  "#CDA869") ; Gold
+      (rainbow-1  "#d8d8d8") ; Rust
+      (rainbow-2  "#CF6A4C") ; Gold
       (rainbow-3  "#F9EE98") ; Pale Yellow
       (rainbow-4  "#8F9D6A") ; Olive
       (rainbow-5  "#AFC4DB") ; Light Blue
@@ -165,7 +165,7 @@
    `(font-lock-reference-face ((t (:inherit font-lock-constant-face)))) ; obsolete
    `(font-lock-regexp-grouping-backslash ((t (:foreground ,tw-light-org))))
    `(font-lock-regexp-grouping-construct ((t (:foreground ,tw-mg-1))))
-   `(font-lock-operator-face ((t (:foreground ,tw-pale-org))))
+   `(font-lock-operator-face ((t (:inherit default))))
 
    `(minibuffer-prompt ((t (:foreground ,tw-bg+8))))
    `(fringe ((t (:background ,tw-bg+3 :foreground ,tw-bg+8))))
