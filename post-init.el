@@ -341,13 +341,13 @@
 ;;;; Themes
 (setq-default custom-safe-themes t)
 
-;; (use-package treesit-auto
-;;   :ensure t
-;;   :custom
-;;   (treesit-auto-install 'prompt)
-;;   :config
-;;   (treesit-auto-add-to-auto-mode-alist 'all)
-;;   (global-treesit-auto-mode))
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist '(python go html css markdown))
+  (global-treesit-auto-mode))
 
 (require 'treesit)
 
@@ -365,8 +365,8 @@
 ;;   (unless (treesit-language-available-p lang)
 ;;     (treesit-install-language-grammar lang)))
 ;;
-;; ;; Set the maximum level of syntax highlighting for Tree-sitter modes
-;; (setq treesit-font-lock-level 4)
+;; Set the maximum level of syntax highlighting for Tree-sitter modes
+(setq treesit-font-lock-level 4)
 ;;
 ;; (defun my/disable-treesit-indent ()
 ;;   "Disable Tree-sitter indentation, fall back to smie or cc-mode."
@@ -437,7 +437,7 @@
                 (keyword blue-faint)
                 (type blue-faint)
                 (fnname fg-ochre)
-                (fnname-call fg-main)
+                (fnname-call fg-ochre)
                 (number cyan-cooler)
                 (variable fg-main)
                 (variable-use fg-main)

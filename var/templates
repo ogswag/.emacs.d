@@ -13,6 +13,44 @@ prog-mode
 
 latex-mode
 
+(lua-default-fonts "\\setmainfont[
+  %% UprightFont = {CMU Serif},
+  %% ItalicFont = {CMU Serif Italic},
+  BoldFont = {CMU Serif Extra},
+  BoldItalicFont = {CMU Serif Bold Italic}
+  %% BoldFeatures = {FakeStretch=0.89},
+  %% BoldItalicFeatures = {FakeStretch=0.89}
+]{CMU Serif}
+
+\\setmathfont{newcomputermodernmath}[Scale=MatchLowercase, RawFeature={+ss03, +ss01}]
+
+\\setsansfont{CMU Sans Serif}[Scale=MatchLowercase]
+\\setmonofont{Fira Code}[RawFeature = {+onum}, Scale=MatchLowercase,]")
+
+(comissioner-as-sans "\\usepackage{fontspec}
+
+\\setsansfont{Commissioner}[ %% set here, since sometimes fontsetup
+                            %% doesn't have builtin sans font
+  Path = /Users/apsacharow/Library/Fonts/,
+  Extension      = .ttf,
+  UprightFont    = -Regular,
+  BoldFont       = -Bold,
+  ItalicFeatures = {
+    FontVariations = {
+      wght = 400,
+      slnt = -10   % Italic slant (-10 degrees)
+    }
+  },
+  BoldItalicFeatures = {
+    FontVariations = {
+      wght = 700,
+      slnt = -10
+    }
+  },
+  Scale=MatchLowercase
+]
+")
+
 (abstract "\\begin{abstract}\n" r> n> "\\end{abstract}")
 (align "\\begin{align}\n" r> n> "\\end{align}")
 (alignn "\\begin{align*}\n" r> n> "\\end{align*}")
@@ -219,6 +257,16 @@ python-mode
 
 (iinp "int(input("p"))" q)
 
+typst-ts-mode
+
+(cmu-fonts "#set text(font: \"CMU Serif\", size: 10pt, lang: \"ru\", hyphenate: true)
+#show strong: set text(font: \"CMU Serif Extra\")
+#show math.equation: set text(font: \"Latin Modern Math\")
+
+// Override bold text to use CMU Serif Extra
+#show text.where(weight: \"bold\"): it => {
+  set text(font: \"CMU Serif Extra\")}
+")
 
 ;; Local Variables:
 ;; mode: lisp-data
