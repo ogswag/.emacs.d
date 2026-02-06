@@ -456,8 +456,7 @@
         (sea "#1E417C")))
 
 (setq-default modus-operandi-palette-overrides
-              '(
-                (      fg-heading-1 blue-warmer)
+              '((      fg-heading-1 blue-warmer)
                 (      fg-heading-2 cyan-faint)
                 (      fg-heading-3 fg-sage)
                 (      fg-heading-4 green-faint)
@@ -465,6 +464,10 @@
                 (      fg-heading-6 red)
                 (      fg-heading-7 rust)
                 (      fg-heading-8 yellow)
+                (bg-main "#E6E8E3")
+                (bg-active "#CDD1C8")
+                (bg-mode-line-active bg-active)
+                (bg-completion "#CDDFB4")
                 (fringe unspecified)
                 (fg-line-number-inactive "gray50")
                 (fg-line-number-active fg-main)
@@ -498,7 +501,7 @@
   :config
   (setq circadian-themes
         '((:sunrise . modus-operandi)
-          (:sunset  . immaterial-dark)))
+          (:sunset  . moe-dark)))
   (circadian-setup))
 
 (use-package beacon
@@ -1264,7 +1267,7 @@
 (add-hook 'c++-mode-hook
           (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
 
-;;;; Snippets
+;;; Snippets
 ;; Configure Tempel
 (use-package tempel
   :ensure t
@@ -1273,7 +1276,6 @@
               ("<backtab>" . tempel-previous))
 
   :init
-
   ;; Setup completion at point
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.  `tempel-expand'
