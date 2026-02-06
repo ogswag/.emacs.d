@@ -953,6 +953,14 @@
         ;; consult--source-project-recent-file ; Optionally remove this too
         ))
 
+(straight-use-package 'prescient)
+(straight-use-package 'corfu-prescient)
+(straight-use-package 'company-prescient)
+(straight-use-package 'vertico-prescient)
+
+(corfu-prescient-mode 1)
+(company-prescient-mode 1)
+(vertico-prescient-mode 1)
 
 ;;;; LSP, formatting, etc.
 ;; Set up the Language Server Protocol (LSP) servers using Eglot.
