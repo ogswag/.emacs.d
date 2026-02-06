@@ -45,6 +45,8 @@
 
 (use-package golden-ratio
   :ensure t
+  :custom
+  (golden-ratio-auto-scale t)
   :config (golden-ratio-mode t))
 
 ;;;;; Language input config
@@ -495,14 +497,46 @@
 (setq calendar-latitude 55.75     ; Moscow
       calendar-longitude 37.62)
 
-;; Install circadian from ELPA
-(use-package circadian
-  :ensure t
-  :config
-  (setq circadian-themes
-        '((:sunrise . modus-operandi)
-          (:sunset  . moe-dark)))
-  (circadian-setup))
+;; (defun my/fix-org-block-extend (&rest _args)
+;;   "Disable :extend for org-block lines to prevent full-width background."
+;;   (dolist (face '(org-block-begin-line org-block-end-line))
+;;     (when (facep face)
+;;       (set-face-attribute face nil :extend nil))))
+;;
+;; ;; 1. Apply it immediately (in case a theme is already loaded)
+;; (my/fix-org-block-extend)
+;;
+;; ;; 2. Apply it whenever a new theme is enabled (Emacs 29+)
+;; (add-hook 'circadian-after-load-theme-hook #'my/fix-org-block-extend)
+;;
+;;
+;; ;; Install circadian from ELPA
+;; (use-package circadian
+;;   :ensure t
+;;   :config
+;;   (setq circadian-themes
+;;         '((:sunrise . modus-operandi)
+;;           (:sunset  . moe-dark)))
+;;   (circadian-setup))
+
+(defun my/set-theme-by-time ()
+  "Load a light theme between 6:00 and 18:00, and a dark theme otherwise."
+  (interactive)
+  (let* ((hour (string-to-number (format-time-string "%H")))
+         (light-theme 'tango)       ; Replace with your preferred light theme
+         (dark-theme  'moe-dark)     ; Replace with your preferred dark theme
+         (now-light?  (and (>= hour 6) (< hour 18)))
+         (target-theme (if now-light? light-theme dark-theme)))
+
+    ;; Only reload if the target theme isn't already the top active one
+    (unless (eq (car custom-enabled-themes) target-theme)
+      ;; Disable all currently active themes to ensure a clean switch
+      (mapc #'disable-theme custom-enabled-themes)
+      (load-theme target-theme t)
+      (message "Switched to %s theme" target-theme))))
+
+;; Run the check every 3600 seconds (1 hour)
+(run-at-time nil 3600 #'my/set-theme-by-time)
 
 (use-package beacon
   :ensure t
@@ -531,6 +565,26 @@
           (lambda () (setq-local show-trailing-whitespace t)))
 (add-hook 'prog-mode-hook
           (lambda () (setq-local show-trailing-whitespace t)))
+
+(use-package expand-region
+  :ensure t)
+
+(use-package change-inner
+  :ensure t)
+
+(use-package goto-chg
+  :ensure t)
+
+(use-package goto-last-point
+  :ensure t
+  :config (goto-last-point-mode))
+
+(use-package move-dup
+  :ensure t)
+
+(use-package surround
+  :ensure t
+  :bind-keymap ("M-'" . surround-keymap))
 
 (use-package diff-hl
   :ensure t)
@@ -1027,6 +1081,25 @@
 
 ;;; Programming Languages
 
+;;;; Compile
+(require 'compile)
+(add-hook 'c-mode-hook
+          (lambda ()
+            (set (make-local-variable 'compile-command)
+                 (if (file-exists-p "Makefile")
+                     ;; If Makefile exists, use "make -k" with current filename as target
+                     (let ((target (file-name-sans-extension
+                                    (file-name-nondirectory buffer-file-name))))
+                       (format "make -k %s" target))
+                   ;; Otherwise, use the default compilation command
+                   (let ((file (file-name-nondirectory buffer-file-name)))
+                     (format "%s -c -o %s.o %s %s %s"
+                             (or (getenv "CC") "gcc")
+                             (file-name-sans-extension file)
+                             (or (getenv "CPPFLAGS") "-DDEBUG=9")
+                             (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
+                             file))))))
+
 ;;;; Flycheck (on the fly syntax checking)
 (use-package flycheck
   :ensure t
@@ -1139,6 +1212,8 @@
                                           "typst-lsp"))))))
 
 ;;;; C/C++
+(use-package doxymacs
+  :ensure t)
 
 ;; Define a custom style matching your clang-format config
 (defconst llvm-allman-style
@@ -1267,6 +1342,11 @@
 (add-hook 'c++-mode-hook
           (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
 
+;;;; Miscellanious language modes
+
+(use-package dockerfile-mode
+  :ensure t)
+
 ;;; Snippets
 ;; Configure Tempel
 (use-package tempel
@@ -1333,5 +1413,100 @@
         (forward-line 1)
         (beginning-of-line))
     (end-of-line)))
+
+(defun my/mark-inside-quotes-seeking-visible ()
+  "Mark inside quotes. If a region is currently active, cycle to the next pair.
+
+  1. If active region: Unselect, jump to end, and search for the NEXT quotes.
+  2. If no region: Try marking at current point.
+  3. If that fails: Search forward for any quote (' or \") in the visible window.
+
+  It loops until it finds a valid quote pair or hits the bottom of the window."
+  (interactive)
+  (require 'expand-region)
+  (let ((origin (point))
+        (limit (window-end nil t))
+        (started-with-region (use-region-p))
+        (search-start (point)))
+
+    ;; 1. Setup: If we already have a selection, start searching from its END
+    (if started-with-region
+        (progn
+          (goto-char (region-end))
+          (deactivate-mark)
+          (setq search-start (point)))
+      ;; If no region, first try to mark exactly where we are
+      (ignore-errors (er/mark-inside-quotes))
+      (setq search-start (point)))
+
+    ;; 2. Search Loop: Run only if we don't have a valid selection yet
+    (while (and (not (use-region-p))
+                (re-search-forward "[\"']" limit t))
+
+      ;; We found a quote and are now placed immediately after it.
+      ;; Try to mark inside.
+      (ignore-errors (er/mark-inside-quotes))
+
+      ;; EDGE CASE: If er/mark-inside-quotes re-selected the *same* region
+      ;; (e.g. we hit the closing quote of the previous string), discard it.
+      (when (and (use-region-p)
+                 started-with-region
+                 (<= (region-beginning) search-start))
+        (deactivate-mark))) ;; Loop will continue to the next quote
+
+    ;; 3. Result / Feedback
+    (unless (use-region-p)
+      (goto-char origin)
+      (if started-with-region
+          (message "No next quotes found in visible window.")
+        (message "No quotes found.")))))
+
+(defun my/mark-outside-quotes-seeking-visible ()
+  "Mark outside quotes (including the quote characters).
+  Behaves like Vim's va\" / va'.
+
+  1. If active region: Unselect, jump to end, and search for the NEXT quote pair.
+  2. If no region: Try marking at current point.
+  3. If that fails: Search forward for any quote (' or \") in the visible window.
+
+  Loops until it finds a new quote pair or hits the bottom of the window."
+  (interactive)
+  (require 'expand-region)
+  (let ((origin (point))
+        (limit (window-end nil t))
+        (started-with-region (use-region-p))
+        (search-start (point)))
+
+    ;; 1. Setup: If we already have a selection, start searching from its END
+    (if started-with-region
+        (progn
+          (goto-char (region-end))
+          (deactivate-mark)
+          (setq search-start (point)))
+      ;; If no region, first try to mark exactly where we are
+      (ignore-errors (er/mark-outside-quotes))
+      (setq search-start (point)))
+
+    ;; 2. Search Loop
+    (while (and (not (use-region-p))
+                (re-search-forward "[\"']" limit t))
+
+      ;; Try to mark outside the quotes from our new position
+      (ignore-errors (er/mark-outside-quotes))
+
+      ;; EDGE CASE: If we hit a closing quote and it re-selected the PREVIOUS string,
+      ;; discard it and keep searching forward.
+      (when (and (use-region-p)
+                 started-with-region
+                 (<= (region-beginning) search-start))
+        (deactivate-mark)))
+
+    ;; 3. Result / Feedback
+    (unless (use-region-p)
+      (goto-char origin)
+      (if started-with-region
+          (message "No next quotes found in visible window.")
+        (message "No quotes found.")))))
+
 
 ;;; post-init.el ends here

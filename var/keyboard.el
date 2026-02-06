@@ -149,7 +149,10 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-set "M-s-<down-mouse-1>" #'mouse-drag-region-rectangle)
 
 (keymap-global-set "M-<down-mouse-1>" #'mc/add-cursor-on-click)
-(keymap-global-set "M-m" #'mc/mark-all-dwim)
+(keymap-global-set "M-m m" #'mc/mark-all-dwim)
+(keymap-global-set "M-m e" #'mc/edit-ends-of-lines)
+(keymap-global-set "M-m b" #'mc/edit-beginnings-of-lines)
+(keymap-global-set "M-m n" #'mc/mark-next-like-this)
 
 (keymap-global-set "M-j" #'join-line)
 
@@ -162,5 +165,47 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-set "s-;" #'meow-reverse)
 
 (keymap-global-set "s-/" #'comment-line)
+
+(keymap-global-unset "M-i" t)
+(keymap-global-unset "M-o" t)
+(keymap-global-unset "C-s" t)
+
+(keymap-global-set "C-s" #'set-mark-command)
+
+(keymap-global-set "M-i q" #'my/mark-inside-quotes-seeking-visible)
+(keymap-global-set "M-i [" #'er/mark-inside-pairs)
+(keymap-global-set "M-i t" #'er/mark-inner-tag)
+(keymap-global-set "M-i d" #'er/mark-defun)
+(keymap-global-set "M-i p" #'er/mark-text-paragraph)
+
+(keymap-global-set "M-o q" #'my/mark-outside-quotes-seeking-visible)
+(keymap-global-set "M-o [" #'er/mark-outside-pairs)
+(keymap-global-set "M-o t" #'er/mark-outer-tag)
+(keymap-global-set "M-o d" #'er/mark-defun)
+(keymap-global-set "M-o p" #'er/mark-text-paragraph)
+
+(keymap-global-unset "M-<up>" t)
+(keymap-global-unset "M-<left>" t)
+(keymap-global-unset "M-<right>" t)
+(keymap-global-unset "M-<down>" t)
+
+(keymap-global-set "M-<up>" #'move-text-region-up)
+(keymap-global-set "M-<down>" #'move-text-region-down)
+
+(keymap-global-set "C-M-<up>" #'move-dup-duplicate-up)
+(keymap-global-set "C-M-<down>" #'move-dup-duplicate-down)
+
+(keymap-global-set "C-c c" #'compile)
+(keymap-global-set "C-c r" #'recompile)
+
+(keymap-global-set "C-c e b" #'eval-buffer)
+(keymap-global-set "C-c e r" #'eval-region)
+
+(keymap-global-set "M-1" #'shell-command)
+(keymap-global-set "M-2" #'async-shell-command)
+
+(keymap-global-set "C-," #'goto-last-change)
+(keymap-global-set "C-<" #'goto-last-change-reverse)
+(keymap-global-set "C-'" #'goto-last-point)
 
 ;;; keyboard.el ends here
