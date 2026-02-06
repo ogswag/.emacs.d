@@ -1097,6 +1097,14 @@ Moe, moe, kyun!")
    'moe-dark
    `(ansi-color-names-vector [,black-5 ,red-0 ,green-0 ,yellow-1 ,blue-1 ,purple-1 ,blue-0 ,white-1])))
 
+;; Same function as above
+(defun my/fix-org-block-extend (&rest _args)
+  (dolist (face '(org-block-begin-line org-block-end-line))
+    (when (facep face)
+      (set-face-attribute face nil :extend nil))))
+
+(my/fix-org-block-extend)
+
 (provide-theme 'moe-dark)
 
 ;; Local Variables:

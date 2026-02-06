@@ -49,6 +49,43 @@
   (golden-ratio-auto-scale t)
   :config (golden-ratio-mode t))
 
+;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
+;; system, providing more convenient undo/redo functionality.
+(use-package undo-fu
+  :ensure t
+  :commands (undo-fu-only-undo
+             undo-fu-only-redo
+             undo-fu-only-redo-all
+             undo-fu-disable-checkpoint))
+
+;; The undo-fu-session package complements undo-fu by enabling the saving
+;; and restoration of undo history across Emacs sessions, even after restarting.
+(use-package undo-fu-session
+  :ensure t
+  :commands undo-fu-session-global-mode
+  :hook (after-init . undo-fu-session-global-mode))
+
+;; (use-package centaur-tabs
+;;   :ensure t
+;;   :demand
+;;   :config
+;;   (centaur-tabs-mode t)
+;;   (setq centaur-tabs-style "bar"
+;;         centaur-tabs-height 16
+;;         centaur-tabs-set-icons t
+;;         centaur-tabs-show-new-tab-button t
+;;         centaur-tabs-set-modified-marker t
+;;         ;; centaur-tabs-show-navigation-buttons t
+;;         centaur-tabs-set-bar 'under
+;;         x-underline-at-descent-line t))
+;; (with-eval-after-load 'centaur-tabs
+;;   ;; Unbind vertical wheel scrolling
+;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <wheel-up>")
+;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <wheel-down>")
+;;   ;; If you see <mouse-4>/<mouse-5> too, unset them as well
+;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-4>")
+;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-5>"))
+
 ;;;;; Language input config
 (setq-default default-input-method 'russian-computer)
 (use-package reverse-im
@@ -497,28 +534,6 @@
 (setq calendar-latitude 55.75     ; Moscow
       calendar-longitude 37.62)
 
-;; (defun my/fix-org-block-extend (&rest _args)
-;;   "Disable :extend for org-block lines to prevent full-width background."
-;;   (dolist (face '(org-block-begin-line org-block-end-line))
-;;     (when (facep face)
-;;       (set-face-attribute face nil :extend nil))))
-;;
-;; ;; 1. Apply it immediately (in case a theme is already loaded)
-;; (my/fix-org-block-extend)
-;;
-;; ;; 2. Apply it whenever a new theme is enabled (Emacs 29+)
-;; (add-hook 'circadian-after-load-theme-hook #'my/fix-org-block-extend)
-;;
-;;
-;; ;; Install circadian from ELPA
-;; (use-package circadian
-;;   :ensure t
-;;   :config
-;;   (setq circadian-themes
-;;         '((:sunrise . modus-operandi)
-;;           (:sunset  . moe-dark)))
-;;   (circadian-setup))
-
 (defun my/set-theme-by-time ()
   "Load a light theme between 6:00 and 18:00, and a dark theme otherwise."
   (interactive)
@@ -687,7 +702,7 @@
   :hook
   (after-init . savehist-mode)
   :custom
-  (savehist-autosave-interval 300)
+  (savehist-save-minibuffer-history t)
   (savehist-additional-variables
    '(kill-ring                        ; clipboard
      register-alist                   ; macros
@@ -724,7 +739,6 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
-  (corfu-auto t)
   (corfu-auto-delay 0.2)
   (corfu-cycle t)
   ;; Enable Corfu
@@ -739,13 +753,14 @@
 ;; by providing additional backends through completion-at-point-functions.
 (use-package cape
   :ensure t
-  :commands (cape-dabbrev cape-file cape-elisp-block)
+  :commands (cape-dabbrev cape-file cape-elisp-block cape-emoji)
   :bind ("C-c p" . cape-prefix-map)
   :init
   ;; Add to the global default value of `completion-at-point-functions' which is
   ;; used by `completion-at-point'.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-emoji)
   (add-hook 'completion-at-point-functions #'cape-elisp-block))
 
 ;; Vertico provides a vertical completion interface, making it easier to
@@ -772,16 +787,6 @@
               ("M-DEL" . vertico-directory-delete-word)) ; Delete whole directory
   ;; Tidy shadowed file names
   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-
-;; Vertico leverages Orderless' flexible matching capabilities, allowing users
-;; to input multiple patterns separated by spaces, which Orderless then
-;; matches in any order against the candidates.
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(orderless flex))
-  (completion-category-defaults nil)
-  (completion-category-overrides '((file (styles partial-completion)))))
 
 ;; Marginalia allows Embark to offer you preconfigured actions in more contexts.
 ;; In addition to that, Marginalia also enhances Vertico by adding rich
@@ -891,44 +896,6 @@
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
   )
 
-;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
-;; system, providing more convenient undo/redo functionality.
-(use-package undo-fu
-  :ensure t
-  :commands (undo-fu-only-undo
-             undo-fu-only-redo
-             undo-fu-only-redo-all
-             undo-fu-disable-checkpoint)
-  )
-
-;; The undo-fu-session package complements undo-fu by enabling the saving
-;; and restoration of undo history across Emacs sessions, even after restarting.
-(use-package undo-fu-session
-  :ensure t
-  :commands undo-fu-session-global-mode
-  :hook (after-init . undo-fu-session-global-mode))
-
-;; (use-package centaur-tabs
-;;   :ensure t
-;;   :demand
-;;   :config
-;;   (centaur-tabs-mode t)
-;;   (setq centaur-tabs-style "bar"
-;;         centaur-tabs-height 16
-;;         centaur-tabs-set-icons t
-;;         centaur-tabs-show-new-tab-button t
-;;         centaur-tabs-set-modified-marker t
-;;         ;; centaur-tabs-show-navigation-buttons t
-;;         centaur-tabs-set-bar 'under
-;;         x-underline-at-descent-line t))
-;; (with-eval-after-load 'centaur-tabs
-;;   ;; Unbind vertical wheel scrolling
-;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <wheel-up>")
-;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <wheel-down>")
-;;   ;; If you see <mouse-4>/<mouse-5> too, unset them as well
-;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-4>")
-;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-5>"))
-
 ;; Skip all buffers starting with *
 (setq consult-buffer-filter
       '("\\` "                           ; Hidden buffers (space prefix)
@@ -953,14 +920,25 @@
         ;; consult--source-project-recent-file ; Optionally remove this too
         ))
 
-(straight-use-package 'prescient)
-(straight-use-package 'corfu-prescient)
-(straight-use-package 'company-prescient)
-(straight-use-package 'vertico-prescient)
+;; (straight-use-package 'prescient)
+;; (straight-use-package 'corfu-prescient)
+;; (straight-use-package 'company-prescient)
+;; (straight-use-package 'vertico-prescient)
+;;
+;; (corfu-prescient-mode 1)
+;; (company-prescient-mode 1)
+;; (vertico-prescient-mode 1)
 
-(corfu-prescient-mode 1)
-(company-prescient-mode 1)
-(vertico-prescient-mode 1)
+;; Optionally use the `orderless' completion style.
+(use-package orderless
+  :custom
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
+  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion))))
+  (completion-category-defaults nil) ;; Disable defaults, use our settings
+  (completion-pcm-leading-wildcard t)) ;; Emacs 31: partial-completion behaves like substring
 
 ;;;; LSP, formatting, etc.
 ;; Set up the Language Server Protocol (LSP) servers using Eglot.
