@@ -1,4 +1,4 @@
-;;; -*- no-byte-compile: t; envy-theme.el --- A light color scheme with comfortable contrast -*- lexical-binding: t -*-
+;;; envy-theme.el --- A light color scheme with comfortable contrast -*- lexical-binding: t -*- no-byte-compile: t;
 
 ;; Copyright (C) 2025 Alexander Zakharov
 

@@ -1,4 +1,4 @@
-;;; -*- no-byte-compile: t; usgc-high-k-st-theme.el --- USGC-HIGH-K-ST color theme for Emacs -*- lexical-binding: t; -*-
+;;; usgc-high-k-st-theme.el --- USGC-HIGH-K-ST color theme for Emacs -*- lexical-binding: t;  -*- no-byte-compile: t;
 
 ;; Copyright (C) 2025 Neil Panchal
 ;;               2025 Alexander Zakharov

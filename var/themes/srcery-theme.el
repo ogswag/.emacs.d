@@ -1,4 +1,4 @@
-;;; -*- no-byte-compile: t; srcery-theme.el --- Dark color theme      -*- lexical-binding: t; -*-
+;;; srcery-theme.el --- Dark color theme -*- lexical-binding: t; -*- no-byte-compile: t;
 ;; Copyright (C) 2019 Daniel Berg
 
 ;; Author: Daniel Berg

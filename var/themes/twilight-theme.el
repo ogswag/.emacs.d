@@ -220,6 +220,14 @@
    `(org-level-7 ((t (:inherit outline-7))))
    `(org-level-8 ((t (:inherit outline-8))))
 
+   ;; Markdown
+   `(markdown-header-face-1 ((t (:inherit 'outline-1))))
+   `(markdown-header-face-2 ((t (:inherit 'outline-2))))
+   `(markdown-header-face-3 ((t (:inherit 'outline-3))))
+   `(markdown-header-face-4 ((t (:inherit 'outline-4))))
+   `(markdown-header-face-5 ((t (:inherit 'outline-5))))
+   `(markdown-header-face-6 ((t (:inherit 'outline-6))))
+
    ;; Diff
    `(diff-header ((t (:background ,tw-bg+5))))
    `(diff-file-header ((t (:inherit diff-header))))

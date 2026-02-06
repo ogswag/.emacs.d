@@ -389,10 +389,10 @@
   :ensure t)
 
 (setq-default modus-themes-headings
-              (quote ((0 . (bold 1.8))
-                      (1 . (bold 1.8))
-                      (2 . (bold 1.6))
-                      (3 . (bold 1.4))
+              (quote ((0 . (bold 1.5))
+                      (1 . (bold 1.5))
+                      (2 . (bold 1.4))
+                      (3 . (bold 1.3))
                       (4 . (bold 1.2))
                       (5 . (bold 1.1))
                       (6 . (bold 1.0))
@@ -498,7 +498,7 @@
   :config
   (setq circadian-themes
         '((:sunrise . modus-operandi)
-          (:sunset  . twilight)))
+          (:sunset  . immaterial-dark)))
   (circadian-setup))
 
 (use-package beacon
@@ -1013,6 +1013,14 @@
 ;; Fully-fledged terminal emulator inside GNU Emacs based on libvterm,
 (use-package vterm
   :ensure t)
+
+;;; Project management
+
+;; project.el is built-in, just use it
+;; Optional: set project search paths
+(setq project-vc-extra-root-markers
+      '(".project" "Makefile" "package.json"
+        "main.c" "main.rs" "main.py" "main.go" "main.cpp" "index.html"))
 
 ;;; Programming Languages
 
