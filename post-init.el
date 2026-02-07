@@ -534,6 +534,12 @@
 (setq calendar-latitude 55.75     ; Moscow
       calendar-longitude 37.62)
 
+;; Same function as above
+(defun my/fix-org-block-extend (&rest _args)
+  (dolist (face '(org-block-begin-line org-block-end-line))
+    (when (facep face)
+      (set-face-attribute face nil :extend nil))))
+
 (defun my/set-theme-by-time ()
   "Load a light theme between 6:00 and 18:00, and a dark theme otherwise."
   (interactive)
@@ -548,6 +554,7 @@
       ;; Disable all currently active themes to ensure a clean switch
       (mapc #'disable-theme custom-enabled-themes)
       (load-theme target-theme t)
+      (my/fix-org-block-extend)
       (message "Switched to %s theme" target-theme))))
 
 ;; Run the check every 3600 seconds (1 hour)
