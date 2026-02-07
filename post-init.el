@@ -420,7 +420,6 @@
 ;; (add-hook 'c++-ts-mode-hook #'my/disable-treesit-indent)
 ;; (add-hook 'prog-mode-hook #'my/disable-treesit-indent)
 
-
 (use-package leuven-theme
   :ensure t)
 
@@ -503,10 +502,6 @@
                 (      fg-heading-6 red)
                 (      fg-heading-7 rust)
                 (      fg-heading-8 yellow)
-                (bg-main "#E6E8E3")
-                (bg-active "#CDD1C8")
-                (bg-mode-line-active bg-active)
-                (bg-completion "#CDDFB4")
                 (fringe unspecified)
                 (fg-line-number-inactive "gray50")
                 (fg-line-number-active fg-main)
@@ -544,8 +539,8 @@
   "Load a light theme between 6:00 and 18:00, and a dark theme otherwise."
   (interactive)
   (let* ((hour (string-to-number (format-time-string "%H")))
-         (light-theme 'tango)       ; Replace with your preferred light theme
-         (dark-theme  'moe-dark)     ; Replace with your preferred dark theme
+         (light-theme 'tango)
+         (dark-theme  'moe-dark)
          (now-light?  (and (>= hour 6) (< hour 18)))
          (target-theme (if now-light? light-theme dark-theme)))
 
@@ -553,9 +548,13 @@
     (unless (eq (car custom-enabled-themes) target-theme)
       ;; Disable all currently active themes to ensure a clean switch
       (mapc #'disable-theme custom-enabled-themes)
-      (load-theme target-theme t)
-      (my/fix-org-block-extend)
-      (message "Switched to %s theme" target-theme))))
+      (if (eq dark-theme target-theme)
+          (progn
+            (load-theme target-theme t)
+            (my/fix-org-block-extend))
+        (load-theme target-theme t))
+      (message "Switched to %s theme" target-theme)
+      )))
 
 ;; Run the check every 3600 seconds (1 hour)
 (run-at-time nil 3600 #'my/set-theme-by-time)
