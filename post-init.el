@@ -86,6 +86,9 @@
 ;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-4>")
 ;;   (keymap-unset centaur-tabs-mode-map "<tab-line> <mouse-5>"))
 
+(setq calendar-latitude 55.75     ; Moscow
+      calendar-longitude 37.62)
+
 ;;;;; Language input config
 (setq-default default-input-method 'russian-computer)
 (use-package reverse-im
@@ -333,7 +336,7 @@
     (set-frame-font "Consolas" t t)))
  ((eq system-type 'darwin) ; macOS
   (when (member "Menlo" (font-family-list))
-    (set-frame-font "Menlo 14" t t)
+    (set-frame-font "Menlo 16" t t)
     (set-face-attribute 'fixed-pitch nil :family "Menlo")
     (set-face-attribute 'variable-pitch nil :family "Helvetica Neue")))
  ((eq system-type 'gnu/linux)
@@ -407,18 +410,9 @@
 ;; (dolist (lang '(markdown markdown_inline))
 ;;   (unless (treesit-language-available-p lang)
 ;;     (treesit-install-language-grammar lang)))
-;;
+
 ;; Set the maximum level of syntax highlighting for Tree-sitter modes
 (setq treesit-font-lock-level 4)
-;;
-;; (defun my/disable-treesit-indent ()
-;;   "Disable Tree-sitter indentation, fall back to smie or cc-mode."
-;;   (setq-local indent-line-function #'prog-indentation-contextual)
-;;   (setq-local indent-region-function nil))  ; Or #'indent-region if preferred
-;;
-;; (add-hook 'c-ts-mode-hook #'my/disable-treesit-indent)
-;; (add-hook 'c++-ts-mode-hook #'my/disable-treesit-indent)
-;; (add-hook 'prog-mode-hook #'my/disable-treesit-indent)
 
 (use-package leuven-theme
   :ensure t)
@@ -426,83 +420,12 @@
 (use-package modus-themes
   :ensure t)
 
-(setq-default modus-themes-headings
-              (quote ((0 . (bold 1.5))
-                      (1 . (bold 1.5))
-                      (2 . (bold 1.4))
-                      (3 . (bold 1.3))
-                      (4 . (bold 1.2))
-                      (5 . (bold 1.1))
-                      (6 . (bold 1.0))
-                      (7 . (bold 1.0))
-                      (8 . (bold 1.0)))))
-
-(setq modus-vivendi-palette-user
-      '((apricot "#FF9752")
-        (jeans "#6181B8")))
-
-(setq-default modus-vivendi-palette-overrides
-              '((      fg-heading-1 blue-warmer)
-                (      bg-heading-1 bg-blue-nuanced)
-                (overline-heading-1 blue)
-                (      fg-heading-2 cyan-faint)
-                (      bg-heading-2 bg-cyan-nuanced)
-                (overline-heading-2 cyan-faint)
-                (      fg-heading-3 fg-sage)
-                (      bg-heading-3 bg-sage)
-                (overline-heading-3 fg-sage)
-                (      fg-heading-4 green-faint)
-                (      bg-heading-4 bg-green-nuanced)
-                (overline-heading-4 green-faint)
-                (      fg-heading-5 magenta-cooler)
-                (      bg-heading-5 bg-magenta-nuanced)
-                (overline-heading-5 magenta-cooler)
-                (      fg-heading-6 red)
-                (      bg-heading-6 bg-red-nuanced)
-                (overline-heading-6 red)
-                (      fg-heading-7 rust)
-                (      bg-heading-7 bg-changed-faint)
-                (overline-heading-7 rust)
-                (      fg-heading-8 yellow)
-                (      bg-heading-8 bg-yellow-nuanced)
-                (overline-heading-8 yellow)
-                (fringe unspecified)
-                (fg-line-number-inactive "gray50")
-                (fg-line-number-active fg-main)
-                (bg-line-number-inactive unspecified)
-                (bg-line-number-active unspecified)
-                (bg-prose-block-contents bg-diff-context)
-                (bg-prose-block-delimiter bg-tab-bar)
-                (fg-prose-block-delimiter "gray80")
-                (cursor red)
-                (preprocessor fg-ochre)
-                (keyword blue-faint)
-                (type blue-faint)
-                (fnname fg-ochre)
-                (fnname-call fg-ochre)
-                (number cyan-cooler)
-                (variable fg-main)
-                (variable-use fg-main)
-                (property fg-main)
-                (operator apricot)
-                (string olive)
-                )
-              )
-
 (setq modus-operandi-palette-user
       '((apricot "#C85100")
         (sea "#1E417C")))
 
 (setq-default modus-operandi-palette-overrides
-              '((      fg-heading-1 blue-warmer)
-                (      fg-heading-2 cyan-faint)
-                (      fg-heading-3 fg-sage)
-                (      fg-heading-4 green-faint)
-                (      fg-heading-5 magenta-cooler)
-                (      fg-heading-6 red)
-                (      fg-heading-7 rust)
-                (      fg-heading-8 yellow)
-                (fringe unspecified)
+              '((fringe unspecified)
                 (fg-line-number-inactive "gray50")
                 (fg-line-number-active fg-main)
                 (bg-line-number-inactive unspecified)
@@ -510,24 +433,10 @@
                 (bg-prose-block-contents bg-diff-context)
                 (bg-prose-block-delimiter bg-tab-bar)
                 (fg-prose-block-delimiter "gray22")
-                (cursor red)
-                (preprocessor yellow)
-                (keyword sea)
-                (type sea)
-                (fnname yellow)
-                (fnname-call yellow)
-                (number cyan-intense)
-                (variable fg-main)
-                (variable-use fg-main)
-                (property fg-main)
-                (operator apricot)
                 (string green-intense)))
 
 (setq modus-themes-italic-constructs nil
       modus-themes-bold-constructs t)
-
-(setq calendar-latitude 55.75     ; Moscow
-      calendar-longitude 37.62)
 
 ;; Same function as above
 (defun my/fix-org-block-extend (&rest _args)
@@ -539,7 +448,7 @@
   "Load a light theme between 6:00 and 18:00, and a dark theme otherwise."
   (interactive)
   (let* ((hour (string-to-number (format-time-string "%H")))
-         (light-theme 'tango)
+         (light-theme 'moe-light)
          (dark-theme  'moe-dark)
          (now-light?  (and (>= hour 6) (< hour 18)))
          (target-theme (if now-light? light-theme dark-theme)))
@@ -562,6 +471,26 @@
 (use-package beacon
   :ensure t
   :config (beacon-mode t))
+
+(use-package goggles
+  :ensure t
+  :hook ((prog-mode text-mode LaTeX-mode) . goggles-mode)
+  :custom
+  (goggles-pulse t)
+  :config
+  (goggles-mode))
+
+(use-package show-inactive-region
+  ;; Emacs minor mode to highlight the inactive region (between point and mark).
+  :ensure t
+  :commands (show-inactive-region-mode)
+  :custom
+  (show-inactive-region-fade-out 0.3)
+  (show-inactive-region-face-dynamic-factor 0.3))
+(require 'show-inactive-region)
+(add-hook 'prog-mode-hook #'show-inactive-region-mode)
+(add-hook 'text-mode-hook #'show-inactive-region-mode)
+(add-hook 'LaTeX-mode-hook #'show-inactive-region-mode)
 
 ;;;; Line numbers
 ;; Display the current line and column numbers in the mode line
@@ -654,7 +583,7 @@
   :ensure t
   ;; :after lispy ; uncomment only if you use lispy; it also sets speed keys on headers!
   :bind (:map outli-mode-map ; convenience key to get back to containing heading
-	          ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
+              ("C-c C-p" . (lambda () (interactive) (outline-back-to-heading))))
   :hook ((prog-mode text-mode) . outli-mode)) ; or whichever modes you prefer
 
 ;; Auto-revert in Emacs is a feature that automatically updates the
@@ -953,16 +882,6 @@
   :commands (eglot-ensure
              eglot-rename
              eglot-format-buffer))
-
-;; Package manager for LSP, DAP, linters, and more for the Emacs Operating System
-(use-package mason
-  :ensure t
-  :config
-  (mason-setup))
-(mason-setup
-  (dolist (pkg '("basedpyright" "ruff" "clangd" "prettier" "tex-fmt"))
-    (unless (mason-installed-p pkg)
-      (ignore-errors (mason-install pkg)))))
 
 ;; Apheleia is an Emacs package designed to run code formatters (e.g., Shfmt,
 ;; Black and Prettier) asynchronously without disrupting the cursor position.
