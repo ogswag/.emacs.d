@@ -146,7 +146,7 @@ Moe, moe, kyun!")
    `(escape-glyph ((,class (:foreground ,yellow-3))))
    `(error ((,class (:foreground ,red-0))))
    `(warning ((,class (:foreground ,orange-1))))
-   `(success ((,class (:foreground ,green-1))))
+   `(success ((,class (:foreground ,green-2))))
 
    ;; Completions
    `(completions-annotations ((,class (:foreground ,green-2))))
