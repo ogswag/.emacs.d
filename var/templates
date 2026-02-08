@@ -11,7 +11,7 @@ prog-mode
 (bug (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "BUG ")
 (hack (if (derived-mode-p 'emacs-lisp-mode) ";; " comment-start) "HACK ")
 
-latex-mode
+LaTeX-mode
 
 (lua-default-fonts "\\setmainfont[
   %% UprightFont = {CMU Serif},
@@ -84,6 +84,8 @@ latex-mode
         (* (1- rows) (p " ") (* (1- cols) " & " (p " ")) "\\\\" n)
         (p " ") (* (1- cols) " & " (p " ")) n
         "\\end{" type "}")
+
+(sum "\\sum\\limits_{"(p "i=1")"}^{"(p "n=\\infty")"}"q)
 
 texinfo-mode
 
