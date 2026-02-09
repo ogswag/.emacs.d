@@ -340,9 +340,9 @@
     (set-face-attribute 'fixed-pitch nil :family "JetBrains Mono")
     (set-face-attribute 'variable-pitch nil :family "Verdana")))
  ((eq system-type 'gnu/linux)
-  (when (member "DejaVu Sans Mono" (font-family-list))
-    (set-frame-font "DejaVu Sans Mono 12" t t)
-    (set-face-attribute 'fixed-pitch nil :family "DejaVu Sans Mono")
+  (when (member "JetBrains Mono" (font-family-list))
+    (set-frame-font "JetBrains Mono 11" t t)
+    (set-face-attribute 'fixed-pitch nil :family "JetBrains Mono")
     (set-face-attribute 'variable-pitch nil :family "Noto Sans"))))
 
 ;;;; Set Font for Unicode Symbols
