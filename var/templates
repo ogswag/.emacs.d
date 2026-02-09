@@ -258,6 +258,9 @@ c-mode
 python-mode
 
 (iinp "int(input("p"))" q)
+(np "import numpy as np"n q)
+(plt "import matplotlib.pyplot as plt"n q)
+(im "import " q)
 
 typst-ts-mode
 

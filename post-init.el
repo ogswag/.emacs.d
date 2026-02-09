@@ -335,10 +335,10 @@
   (when (member "Consolas" (font-family-list))
     (set-frame-font "Consolas" t t)))
  ((eq system-type 'darwin) ; macOS
-  (when (member "Menlo" (font-family-list))
-    (set-frame-font "Menlo 16" t t)
-    (set-face-attribute 'fixed-pitch nil :family "Menlo")
-    (set-face-attribute 'variable-pitch nil :family "Helvetica Neue")))
+  (when (member "JetBrains Mono" (font-family-list))
+    (set-frame-font "JetBrains Mono 14" t t)
+    (set-face-attribute 'fixed-pitch nil :family "JetBrains Mono")
+    (set-face-attribute 'variable-pitch nil :family "Verdana")))
  ((eq system-type 'gnu/linux)
   (when (member "DejaVu Sans Mono" (font-family-list))
     (set-frame-font "DejaVu Sans Mono 12" t t)
@@ -674,6 +674,7 @@
   ;; Disable Ispell completion function. As an alternative try `cape-dict'.
   (text-mode-ispell-word-completion nil)
   (tab-always-indent 'complete)
+  (corfu-auto t)
   (corfu-auto-delay 0.2)
   (corfu-cycle t)
   ;; Enable Corfu
@@ -990,7 +991,19 @@
       '(".project" "Makefile" "package.json"
         "main.c" "main.rs" "main.py" "main.go" "main.cpp" "index.html"))
 
-;;; Programming Languages
+;;; Programming
+
+;;;; Flycheck (on the fly syntax checking)
+(use-package flycheck
+  :ensure t
+  :custom (flycheck-highlighting-mode 'symbols)
+  :init (global-flycheck-mode))
+
+;;;; rainbow-delimeters
+(use-package rainbow-delimiters
+  :ensure t
+  :hook ((prog-mode . rainbow-delimiters-mode)
+         (LaTeX-mode . rainbow-delimiters-mode)))
 
 ;;;; Compile
 (require 'compile)
@@ -1011,19 +1024,7 @@
                              (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
                              file))))))
 
-;;;; Flycheck (on the fly syntax checking)
-(use-package flycheck
-  :ensure t
-  :custom (flycheck-highlighting-mode 'symbols)
-  :init (global-flycheck-mode))
-
-;;;; rainbow-delimeters
-(use-package rainbow-delimiters
-  :ensure t
-  :hook ((prog-mode . rainbow-delimiters-mode)
-         (LaTeX-mode . rainbow-delimiters-mode)))
-
-;;;; ssh
+;;;; ssh config
 (use-package ssh-config-mode
   :ensure t)
 
@@ -1121,6 +1122,9 @@
                    ,(eglot-alternatives `(,typst-ts-lsp-download-path
                                           "tinymist"
                                           "typst-lsp"))))))
+
+;;;; GNU Octave
+(add-to-list 'auto-mode-alist '("\\.m\\'". octave-mode))
 
 ;;;; C/C++
 (use-package doxymacs
@@ -1242,16 +1246,14 @@
                                 (c++-mode . "llvm-allman")
                                 (java-mode . "java")
                                 (awk-mode . "awk")
-                                (other . "gnu")))
+                                (other . "bsd")))
 
 ;; Apply to existing buffers via hooks
 (add-hook 'c-mode-hook 'my/setup-c-style)
 (add-hook 'c++-mode-hook 'my/setup-c-style)
 ;; Add after your style setup in the hook
-(add-hook 'c-mode-hook
-          (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
-(add-hook 'c++-mode-hook
-          (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
+(add-hook 'c-mode-hook (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
+(add-hook 'c++-mode-hook (lambda () (local-set-key (kbd "TAB") #'my/tempel-or-indent)))
 
 ;;;; Miscellanious language modes
 
@@ -1265,7 +1267,6 @@
   :bind (:map tempel-map
               ("<tab>" . tempel-next)
               ("<backtab>" . tempel-previous))
-
   :init
   ;; Setup completion at point
   (defun tempel-setup-capf ()
@@ -1295,6 +1296,28 @@
   )
 
 ;;; Personal function definitions
+(defun my/open-curdir ()
+  "Open `default-directory' in the system file manager."
+  (interactive)
+  (let ((dir (expand-file-name default-directory)))
+    (cond
+     ;; macOS
+     ((eq system-type 'darwin)
+      (shell-command (format "open %S" dir)))
+     ;; Linux with xdg-open
+     ((memq system-type '(gnu gnu/linux gnu/kfreebsd))
+      (start-process "" nil "xdg-open" dir))
+     ;; Windows, for completeness
+     ((eq system-type 'windows-nt)
+      (w32-shell-execute "open" dir)))))
+
+(defun my/run-python-new-frame ()
+  "Create a new frame with interactive python console."
+  (interactive)
+  (make-frame)
+  (run-python)
+  (switch-to-buffer "*Python*"))
+
 (defun my/nuke-line-backwards ()
   "Nuke, as in delete without saving to register, line backwards."
   (interactive)
@@ -1374,7 +1397,7 @@
 
 (defun my/mark-outside-quotes-seeking-visible ()
   "Mark outside quotes (including the quote characters).
-  Behaves like Vim's va\" / va'.
+Behaves like Vim's va\" / va'.
 
   1. If active region: Unselect, jump to end, and search for the NEXT quote pair.
   2. If no region: Try marking at current point.
