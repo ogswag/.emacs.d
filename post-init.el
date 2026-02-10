@@ -161,6 +161,7 @@
 (setq-default cursor-type 'bar)
 
 (context-menu-mode t)
+(menu-bar-mode t)
 
 (use-package which-key
   :ensure nil ; already builtin
