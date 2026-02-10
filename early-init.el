@@ -483,13 +483,11 @@ this stage of initialization."
 (setq use-package-enable-imenu-support t)
 (setq package-archives '(("melpa"        . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
                          ("gnu"          . "https://elpa.gnu.org/packages/")
-                         ("nongnu"       . "https://elpa.nongnu.org/nongnu/")
-                         ("melpa-stable" . "https://stable.melpa.org/packages/")))
+                         ("nongnu"       . "https://elpa.nongnu.org/nongnu/")))
 (setq package-archive-priorities '(("gnu"    . 99)
                                    ("nongnu" . 80)
                                    ("melpa"  . 70)
-                                   ("melpa-stable" . 50)))
-
+))
 ;;;; Load post-early-init.el
 (minimal-emacs-load-user-init "post-early-init.el")
 

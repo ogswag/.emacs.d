@@ -44,10 +44,7 @@
   :ensure t)
 
 (use-package golden-ratio
-  :ensure t
-  :custom
-  (golden-ratio-auto-scale t)
-  :config (golden-ratio-mode t))
+  :ensure t)
 
 ;; The undo-fu package is a lightweight wrapper around Emacs' built-in undo
 ;; system, providing more convenient undo/redo functionality.
@@ -288,21 +285,6 @@
 (when (eq system-type 'darwin)
   (use-package pcmpl-homebrew
     :ensure t))
-
-;; Linux-specific completions (apt, pacman, etc.)
-(when (eq system-type 'gnu/linux)
-  ;; For Debian/Ubuntu systems
-  (when (or (file-exists-p "/etc/debian_version")
-            (file-exists-p "/etc/ubuntu_version"))
-    (use-package pcmpl-apt
-      :ensure t
-      :if (fboundp 'pcomplete/apt)))
-
-  ;; For Arch/Manjaro systems
-  (when (file-exists-p "/etc/arch-release")
-    (use-package pcmpl-pacman
-      :ensure t
-      :if (fboundp 'pcomplete/pacman))))
 
 (use-package pcmpl-pip
   :ensure t)
