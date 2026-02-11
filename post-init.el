@@ -5,7 +5,6 @@
 
 ;;; Emacs System Options and Packages
 ;;;; General System Options and Packages
-
 (setq-default use-package-enable-imenu-support t)
 
 ;; Only use exec-path-from-shell on macOS
@@ -470,10 +469,10 @@
   :custom
   (show-inactive-region-fade-out 0.3)
   (show-inactive-region-face-dynamic-factor 0.3))
-(require 'show-inactive-region)
-(add-hook 'prog-mode-hook #'show-inactive-region-mode)
-(add-hook 'text-mode-hook #'show-inactive-region-mode)
-(add-hook 'LaTeX-mode-hook #'show-inactive-region-mode)
+;; (require 'show-inactive-region)
+;; (add-hook 'prog-mode-hook #'show-inactive-region-mode)
+;; (add-hook 'text-mode-hook #'show-inactive-region-mode)
+;; (add-hook 'LaTeX-mode-hook #'show-inactive-region-mode)
 
 ;;;; Line numbers
 ;; Display the current line and column numbers in the mode line
@@ -875,9 +874,9 @@
   :config
   ;; Configure formatters after apheleia loads
   (setf (alist-get 'python-mode apheleia-mode-alist)
-        '(ruff))
+        '(yapf))
   (setf (alist-get 'python-ts-mode apheleia-mode-alist)
-        '(ruff))
+        '(yapf))
   (setf (alist-get 'c++-mode apheleia-mode-alist)
         '(clang-format))
   (setf (alist-get 'c++-ts-mode apheleia-mode-alist)
@@ -967,7 +966,6 @@
   :ensure t)
 
 ;;; Project management
-
 ;; project.el is built-in, just use it
 ;; Optional: set project search paths
 (setq project-vc-extra-root-markers
@@ -975,6 +973,7 @@
         "main.c" "main.rs" "main.py" "main.go" "main.cpp" "index.html"))
 
 ;;; Programming
+(add-to-list 'auto-mode-alist '("/etc/hosts\\'" . conf-mode))
 
 ;;;; Flycheck (on the fly syntax checking)
 (use-package flycheck
@@ -1048,6 +1047,13 @@
 ;; Add to both python-mode and python-ts-mode hooks
 (add-hook 'python-mode-hook 'my/add-python-keybindings)
 (add-hook 'python-ts-mode-hook 'my/add-python-keybindings)
+
+(use-package indent-bars
+  :ensure t
+  :hook ((python-mode yaml-mode) . indent-bars-mode)) ; or whichever modes you prefer
+
+(use-package highlight-indent-guides
+  :ensure t)
 
 ;;;; Vimrc
 (use-package vimrc-mode
