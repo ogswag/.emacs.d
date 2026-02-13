@@ -12,7 +12,7 @@
 Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
   (replace-regexp-in-string "LEADER" my/leader-key key t))  ;; The 't' argument prevents function from capitalizing "s" to "S"
 
-(require 'viper)
+(require 'viper-cmd)
 
 ;;;; UNBINDS
 (keymap-global-unset "C-M-<wheel-down>") ; mouse-wheel-global-text-scale
@@ -84,8 +84,7 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-unset "M-b")
 (keymap-global-unset "C-<left>")
 (keymap-global-unset "C-<right>")
-(keymap-global-unset "C-M-/")
-(keymap-global-set "C-M-/")
+                                        ; (keymap-global-unset "C-M-/")
 
 (keymap-global-set "C-<left>" #'viper-backward-word)
 (keymap-global-set "C-<right>" #'viper-forward-word)
