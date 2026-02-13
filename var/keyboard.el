@@ -67,8 +67,10 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
   (keymap-global-set "s-q" #'ns-do-hide-emacs))
 
 (when my/is-linux
+  (keymap-global-unset "C-z" t)
+  (keymap-global-unset "C-Z" t)
   (keymap-global-set "C-z" #'undo-fu-only-undo)
-  (keymap-global-set "C-Z" #'undo-fu-only-redo))
+  (keymap-global-set "C-r" #'undo-fu-only-redo))
 
 (keymap-global-set "C-=" #'text-scale-increase)
 (keymap-global-set "C--" #'text-scale-decrease)
@@ -122,10 +124,10 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-set (my/select-leader "LEADER-u") #'my/move-bol-or-prev-eol)
 (keymap-global-set (my/select-leader "LEADER-o") #'my/move-eol-or-next-bol)
 
-(keymap-global-set "s-l" #'meow-line)
-(keymap-global-set "s-;" #'meow-reverse)
+(keymap-global-set (my/select-leader "LEADER-l") #'meow-line)
+(keymap-global-set (my/select-leader "LEADER-;") #'meow-reverse)
 
-(keymap-global-set "s-/" #'comment-line)
+(keymap-global-set (my/select-leader "LEADER-/") #'comment-line)
 
 (keymap-global-set "C-s" #'set-mark-command)
 
