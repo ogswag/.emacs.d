@@ -12,24 +12,26 @@
 Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
   (replace-regexp-in-string "LEADER" my/leader-key key t))  ;; The 't' argument prevents function from capitalizing "s" to "S"
 
+(require 'viper)
+
 ;;;; UNBINDS
 (keymap-global-unset "C-M-<wheel-down>") ; mouse-wheel-global-text-scale
-(keymap-global-unset "C-M-<wheel-up>") ; mouse-wheel-global-text-scale
-(keymap-global-unset "C-<wheel-down>") ; mouse-wheel-text-scale
-(keymap-global-unset "C-<wheel-up>") ; mouse-wheel-text-scale
-(keymap-global-unset "C-<mouse-5>")   ;; mouse-wheel-text-scale down
-(keymap-global-unset "C-<mouse-4>")   ;; mouse-wheel-text-scale up
-(keymap-global-unset "C-M-<mouse-5>") ;; mouse-wheel-global-text-scale down
-(keymap-global-unset "C-M-<mouse-4>") ;; mouse-wheel-global-text-scale up
+(keymap-global-unset "C-M-<wheel-up>")   ; mouse-wheel-global-text-scale
+(keymap-global-unset "C-<wheel-down>")   ; mouse-wheel-text-scale
+(keymap-global-unset "C-<wheel-up>")     ; mouse-wheel-text-scale
+(keymap-global-unset "C-<mouse-5>")      ; mouse-wheel-text-scale down
+(keymap-global-unset "C-<mouse-4>")      ; mouse-wheel-text-scale up
+(keymap-global-unset "C-M-<mouse-5>")    ; mouse-wheel-global-text-scale down
+(keymap-global-unset "C-M-<mouse-4>")    ; mouse-wheel-global-text-scale up
 
-(keymap-global-unset "M-l")  ;; downcase-word
-(keymap-global-unset "M-u")  ;; upcase-word
-(keymap-global-unset "M-c")  ;; capitalize-word
+(keymap-global-unset "M-l")  ; downcase-word
+(keymap-global-unset "M-u")  ; upcase-word
+(keymap-global-unset "M-c")  ; capitalize-word
 
 ;; Disable secondary selection mouse bindings
-(keymap-global-unset "<mouse-2>") ;; middle mouse button secondary yank
-(keymap-global-unset "M-<mouse-1>") ;; set secondary selection start
-(keymap-global-unset "M-<mouse-3>") ;; set secondary selection end
+(keymap-global-unset "<mouse-2>")   ; middle mouse button secondary yank
+(keymap-global-unset "M-<mouse-1>") ; set secondary selection start
+(keymap-global-unset "M-<mouse-3>") ; set secondary selection end
 
 (keymap-global-unset "C-M-<down-mouse-1>")
 (keymap-global-unset "C-s" t)
@@ -41,8 +43,8 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 (keymap-global-unset "M-j")
 (keymap-global-unset "M-m")
 (keymap-global-unset "M-o" t)
-(keymap-global-unset "M-{") ;; backward-paragraph
-(keymap-global-unset "M-}") ;; forward-paragraph
+(keymap-global-unset "M-{") ; backward-paragraph
+(keymap-global-unset "M-}") ; forward-paragraph
 (keymap-global-unset "s--")
 (keymap-global-unset "s-0")
 (keymap-global-unset "s-<left>")
@@ -76,6 +78,15 @@ Example: (my/select-leader \"f\") → \"s-f\" on macOS, \"C-M-f\" on Linux"
 
 (keymap-global-set "M-[" #'backward-paragraph)
 (keymap-global-set "M-]" #'forward-paragraph)
+(keymap-global-unset "M-f")
+(keymap-global-unset "M-b")
+(keymap-global-unset "C-<left>")
+(keymap-global-unset "C-<right>")
+(keymap-global-unset "C-M-/")
+(keymap-global-set "C-M-/")
+
+(keymap-global-set "C-<left>" #'viper-backward-word)
+(keymap-global-set "C-<right>" #'viper-forward-word)
 
 (keymap-global-set (my/select-leader "LEADER-k") #'meow-beginning-of-thing)
 ;; (keymap-global-set (my/select-leader "LEADER-<down>") (lambda () (interactive) (meow-end-of-thing ?d))) ; <- this is for an immeadiate selection of THING

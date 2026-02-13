@@ -258,6 +258,7 @@ c-mode
 python-mode
 
 (iinp "int(input("p"))" q)
+(ifnamemain "def main():"n> "pass"n n"if __name__ == \"__main__\":"n>"main()")
 (np "import numpy as np"n q)
 (plt "import matplotlib.pyplot as plt"n q)
 (im "import " q)
